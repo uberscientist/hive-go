@@ -1,0 +1,47 @@
+html {
+  font-family: 'Chelsea Market', cursive;
+  background-color: #EAC185;
+  background-image: url('/images/purty_wood.png');
+}
+
+a {
+  color: #005DFF;
+}
+
+a:visited {
+  color: #004ACC;
+}
+
+h1 {
+  font-size: 4em;
+  margin: 0px;
+}
+
+hr {
+  border-style: solid none;
+  width: 70%;
+}
+
+#page-wrap {
+  width: 800px;
+  height: 1600px;
+  border-style: none solid;
+  padding: 0px 20px;
+  margin: 0px auto;
+}
+
+  #page-wrap #goban {
+    width: 500px;
+    height: 500px;
+    margin: 10px auto;
+  }
+
+  #page-wrap .message {
+    width: 70%;
+    border-style: solid none;
+    border-width: 2px;
+    text-align: center;
+    font-size: 1.6em;
+    padding: 10px;
+    margin: 20px auto;
+  }
