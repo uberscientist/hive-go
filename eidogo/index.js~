@@ -1,0 +1,18 @@
+require('./lang.js');
+require('./eidogo.js');
+require('./board.js');
+require('./rules.js');
+
+module.exports = this.playMove = function (coord, color, noRender) {
+  var color = color == "W" ? 1 : -1;
+  var pt = coord;
+  if (!coord || coord == "tt" || coord == "") {
+    console.log('pass');
+  } else if (coord == "resign") {
+    console.log('resign');
+  } else if (coord && coord != "tt") {
+      board.addStone(pt, color);
+      rules.apply(pt, color);
+  }
+};
+

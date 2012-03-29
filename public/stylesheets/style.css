@@ -29,6 +29,10 @@ hr {
   padding: 0px 20px;
   margin: 0px auto;
 }
+  
+  #page-wrap #current-color {
+    font-weight: bold;
+  }
 
   #page-wrap #goban {
     width: 500px;
@@ -45,3 +49,7 @@ hr {
     padding: 10px;
     margin: 20px auto;
   }
+  
+    #page-wrap .message .timer {
+      font-size: 2em;
+    }
