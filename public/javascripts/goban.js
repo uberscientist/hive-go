@@ -1,11 +1,6 @@
 var socket = io.connect("http://localhost:3000");
 
-//Timer vars
-var SEC = 1000,
-    MIN = SEC * 60,
-    HOUR = MIN * 60;
-
-//Socket.IO events
+// Socket.IO events
 socket.on("message", function(data){
   updateMessage(data.message);
 });
@@ -19,14 +14,20 @@ socket.on("board", function(data){
     window.current_color = "black";
   else
     window.current_color = "white";
-  $('#current-color').html(current_color);
+  $("#current-color").html(current_color);
 
   //Set global stones
   window.stones = data.stones;
   drawStones();
 });
 
+// Functions
 function updateTimer(time){
+  // Timer vars
+  var SEC = 1000,
+      MIN = SEC * 60,
+      HOUR = MIN * 60;
+
   if(time <= 0){
     $("div.timer").html("-:-:-");
     return;
@@ -39,36 +40,48 @@ function updateTimer(time){
 }
 
 function updateMessage(message){
-  $("div.voting").html(message);
-}
-
-function getStoneColor(index){
-  var color = window.stones[Math.abs(index - 80)];
-  if(color == 0)
-    return "transparent";
-  if(color == -1)
-    return "black";
-  if(color == 1)
-    return "white";
+  $("div.voting").hide().html(message).fadeIn("slow");
 }
 
 function drawStones(){
-  window.stoneOverlay = window.stoneOverlay || new Kinetic.Layer();
-  stoneOverlay.clear();
+  window.stoneOverlay = new Kinetic.Layer();
+
+  //Setup gradients for stones
+  var context = stoneOverlay.getContext();
+  var white_grd = context.createRadialGradient(-30, -30, 5, 0, -5, 25);
+  white_grd.addColorStop(0, "#ffffff");
+  white_grd.addColorStop(1, "#bbbbbb");
+
+  var black_grd = context.createRadialGradient(-30, -30, 1, -5, -5, 25);
+  black_grd.addColorStop(0, "#d8d8d8");
+  black_grd.addColorStop(1, "#000000");
+
   var pos_x = 0, pos_y = 500;
+
+  function getStoneColor(i){
+    switch(window.stones[Math.abs(i - 80)]){
+      case 0:
+        return "transparent";
+      case -1:
+        return black_grd;
+      case 1:
+        return white_grd;
+    }
+  };
 
   for(var i = 80; i >= 0; i--){
     (function(){
       pos_x++
 
       var circle = new Kinetic.Circle({
+
         x: pos_x * 50,
         y: pos_y - 50,
         radius: 23,
         name: i,
         fill: getStoneColor(i),
 
-        //Creates point object to circle to pass to eidogo board/rules
+        //Creates and binds point object to circle to pass to eidogo board/rules
         point: {x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
       });
 
@@ -77,48 +90,54 @@ function drawStones(){
         pos_x = 0;              //Go to beginning of row
       }
 
-    circle.on("mouseover", function(){
-      this.setFill(current_color);
-      stoneOverlay.draw();
-    })
+      circle.on("mouseover", function(){
+        if(getStoneColor(circle.name) != "transparent")
+          return;
+        this.setFill(current_color);
+        this.setAlpha(.5);
+        stoneOverlay.draw();
+      })
 
-    circle.on("mouseout", function(){
-      this.setFill(getStoneColor(this.name));
-      stoneOverlay.draw();
-    })
+      circle.on("mouseout", function(){
+        this.setFill(getStoneColor(this.name));
+        this.setAlpha(1);
+        stoneOverlay.draw();
+      })
 
-    circle.on("click", function(){
-      socket.emit("vote", { coord: this.point });
-    });
+      circle.on("mouseup", function(){
+        socket.emit("vote", { coord: this.point });
+      });
 
-    stoneOverlay.add(circle);
+      stoneOverlay.add(circle);
     }());
   }
-
-  stage.add(stoneOverlay);
-  stoneOverlay.draw();
+  
+  drawBoardBg(function(){
+    stage.add(stoneOverlay);
+  });
 }
 
-window.onload = function(){
-  window.stage = new Kinetic.Stage("goban", 500, 500);
-  var gobanLayer = new Kinetic.Layer();
-  var background = new Kinetic.Layer();
+function drawBoardBg(callback){
+  window.stage = window.stage || new Kinetic.Stage("goban", 500, 500);
+  var gobanLayer = gobanLayer || new Kinetic.Layer();
+  var background = background || new Kinetic.Layer();
 
   var gobanGridObj = new Image();
   
   //Draw the backround
   gobanGridObj.onload = function(){
-    var gobanGrid = new Kinetic.Image({ image: gobanGridObj,
-                                            x: 50,
-                                            y: 50 });
 
-    var gobanBack = new Kinetic.Rect({ width: 500,
-                                      height: 500,
-                                        fill: "#CC7D00" });
+    var gobanGrid = gobanGrid || new Kinetic.Image({ image: gobanGridObj,
+                                                          x: 50,
+                                                          y: 50 });
+
+    var gobanBack = gobanBack || new Kinetic.Rect({ width: 500,
+                                                    height: 500,
+                                                      fill: "#CC7D00" });
     gobanLayer.add(gobanBack);
     gobanLayer.add(gobanGrid);
     stage.add(gobanLayer);
-    drawStones();
+    callback();
   };
 
   gobanGridObj.src = "/images/goban9.png";

@@ -24,10 +24,8 @@ Date.prototype.addHours = function(h){
   return this;
 }
 
-Date.prototype.addMinutes = function(m){
-
-  //Thanks kennebec from stackoverflow
-  this.setMinutes(this.getMinutes() + m);
+Date.prototype.addSeconds = function(s){
+  this.setSeconds(this.getSeconds() + s);
   return this;
 }
 
@@ -53,9 +51,9 @@ app.configure('production', function(){
 function vote(coord, ip, callback){
   db.sismember('go:already-voted', ip, function(err, data){
     if(err) throw err;
-
-    if(data){
-      callback(false);
+    
+    if(data == 1){
+      callback(true);
 
     } else {
 
@@ -65,7 +63,7 @@ function vote(coord, ip, callback){
         .sadd('go:already-voted', ip)
         .exec(function(err){
             if(err) throw err;
-            callback(true);
+            callback(false);
         });
     }
   });
@@ -80,14 +78,14 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addMinutes(1).getTime();
+      next_round = new Date().addSeconds(3).getTime();
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
        //Reset countdown
-      next_round = new Date().addMinutes(1).getTime();
+      next_round = new Date().addSeconds(3).getTime();
       //clear IPs and votes
       db.multi()
         .del('go:already-voted')
@@ -98,7 +96,7 @@ function updateBoard(){
           //Reverse color
           global.current_color = -global.current_color;
 
-          io.sockets.emit('message', { message: 'New Turn!' });
+          io.sockets.emit('message', { message: 'until next vote count' });
           io.sockets.emit('board', { color: global.current_color
                                   , stones: go.rules.board.stones });
         });
@@ -120,7 +118,7 @@ io.sockets.on('connection', function(socket){
     go.checkMove(data.coord, function(check){
       if(check){
         vote(data.coord, ip, function(voted){
-          if(!voted){
+          if(voted){
             socket.emit('message', { message: 'Your IP has already voted for this turn' })
           } else {
             socket.emit('message', { message: 'Every vote counts! Thank you' })
@@ -149,7 +147,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addMinutes(1).getTime();
+var next_round = new Date().addSeconds(3).getTime();
 
 //Start color as black (-1)
 global.current_color =  -1;

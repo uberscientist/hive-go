@@ -42,6 +42,7 @@ hr {
 
   #page-wrap .message {
     width: 70%;
+    height: 112px;
     border-style: solid none;
     border-width: 2px;
     text-align: center;
