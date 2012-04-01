@@ -111,9 +111,21 @@ app.get('/', routes.index);
 // Socket.IO
 io.sockets.on('connection', function(socket){
   var ip = socket.handshake.address.address;
-  io.sockets.emit('board', { color: global.current_color
-                          , stones: go.rules.board.stones });
 
+  //On connect send stuff from Redis so they can draw the page
+  db.multi()
+    .scard('go:already-voted')
+    .zrange('go:votes', 0, -1, 'withscores')
+    .exec(function(err, results){
+      console.log(results);
+
+      io.sockets.emit('board', { color: global.current_color
+                                , stones: go.rules.board.stones
+                                , unique_votes: results[0]
+                                , heat_points: results[1] });
+    });
+
+ 
   socket.on('vote', function(data){
     go.checkMove(data.coord, function(check){
       if(check){

@@ -26,7 +26,7 @@ eidogo.Board.prototype = {
      * @param {Number} Board size -- theoretically could be any size,
      * but there's currently only CSS for 9, 13, and 19
      */
-    init: function(renderer, boardSize) {
+    init: function(boardSize) {
         this.boardSize = boardSize || 9;
         this.stones = this.makeBoardArray(this.EMPTY);
         this.markers = this.makeBoardArray(this.EMPTY);
@@ -34,14 +34,9 @@ eidogo.Board.prototype = {
         this.captures.W = 0;
         this.captures.B = 0;
         this.cache = [];
-        /**this.renderer = renderer || new eidogo.BoardRendererHtml();
-        this.lastRender = {
-            stones: this.makeBoardArray(null),
-            markers: this.makeBoardArray(null)
-        }; **/
-    },
+     },
     reset: function() {
-        this.init(this.renderer, this.boardSize);
+        this.init(this.boardSize);
     },
     clear: function() {
         this.clearStones();
@@ -124,44 +119,4 @@ eidogo.Board.prototype = {
     getMarker: function(pt) {
         return this.markers[pt.y * this.boardSize + pt.x];
     }
- /**   render: function(complete) {
-        var stones = this.makeBoardArray(null);
-        var markers = this.makeBoardArray(null);
-        var color, type;
-        var len;
-        if (!complete && this.cache.last()) {
-            var lastCache = this.cache.last();
-            len = this.stones.length;
-            // render only points that have changed since the last render
-            for (var i = 0; i < len; i++) {
-                if (lastCache.stones[i] != this.lastRender.stones[i]) {
-                    stones[i] = lastCache.stones[i];
-                }
-            }
-            markers = this.markers;
-        } else {
-            // render everything
-            stones = this.stones;
-            markers = this.markers;
-        }
-        var offset;
-        for (var x = 0; x < this.boardSize; x++) {
-            for (var y = 0; y < this.boardSize; y++) {
-                offset = y * this.boardSize + x;
-                if (markers[offset] != null) {
-                    this.renderer.renderMarker({x: x, y: y}, markers[offset]);
-                    this.lastRender.markers[offset] = markers[offset];
-                }
-                if (stones[offset] == null) {
-                    continue;
-                } else if (stones[offset] == this.EMPTY) {
-                    color = "empty";
-                } else {
-                    color = (stones[offset] == this.WHITE ? "white" : "black");
-                }
-                this.renderer.renderStone({x: x, y: y}, color);
-                this.lastRender.stones[offset] = stones[offset];
-            }
-        }
-    } **/
-};
+ };
