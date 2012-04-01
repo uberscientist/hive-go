@@ -126,16 +126,6 @@ function drawStones(stones){
     strokeWidth: 3
   });
 
-  var resign_rect = new Kinetic.Rect({
-    x: 300,
-    y: 480,
-    width: 100,
-    height: 40,
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3
-  });
-
   var pass_text = new Kinetic.Text({
     x: 150,
     y: 500,
@@ -145,6 +135,16 @@ function drawStones(stones){
     textFill: "black",
     align: "center",
     verticalAlign: "middle"
+  });
+
+  var resign_rect = new Kinetic.Rect({
+    x: 300,
+    y: 480,
+    width: 100,
+    height: 40,
+    fill: "#A36400",
+    stroke: "#7A4B00",
+    strokeWidth: 3
   });
 
   var resign_text = new Kinetic.Text({
@@ -212,7 +212,7 @@ function drawStones(stones){
 
   //Add coordinates
   for(var i=0; i < 9; i++){
-    letter = new Kinetic.Text({
+    alpha = new Kinetic.Text({
       x: 50 + i * 50,
       y: 18,
       fontFamily: "Chelsea Market",
@@ -222,7 +222,7 @@ function drawStones(stones){
       align: "center",
       verticalAlign: "middle"
     });
-    stoneOverlay.add(letter);
+    stoneOverlay.add(alpha);
   }
   
   for(var i=0; i < 9; i++){

@@ -4,7 +4,7 @@ require('./board.js');
 require('./rules.js');
 
 // Setup Eidogo board
-global.pass = 0;
+exports.pass = pass = 0;
 var board = new eidogo.Board;
 var rules = exports.rules = new eidogo.Rules(board);
 
@@ -13,20 +13,22 @@ exports.playMove = function (coord, color, callback) {
   if (coord == 'pass') {
 
     //Check if both players have passed in row
-    global.pass += 1;
-    if(global.pass == 2){
+    exports.pass = pass += 1;
+    if(pass == 2){
+      pass = 0;
       rules.board.reset();
+      global.current_color = -1;
     }
     callback('pass');
   } else if (coord == 'resign') {
+    pass = 0;
 
     //reset game if resign
     rules.board.reset();
+    global.current_color = -1;
     callback('resign');
   } else if (coord) {
-    
-    //reset pass
-    global.pass = 0;
+    pass = 0;
 
     //Add stone  
     board.addStone(coord, color);

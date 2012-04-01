@@ -93,8 +93,11 @@ function updateBoard(){
         .exec(function(err){
           if(err) throw err;
 
-          //Reverse color
-          global.current_color = -global.current_color;
+          //Reverse color, or let reset if end-game
+          if((coord == 'pass' && go.pass == 2) || coord == 'resign')
+            global.current_color = global.current_color;
+          else
+            global.current_color = -global.current_color;
 
           io.sockets.emit('message', { message: 'until next vote count' });
           io.sockets.emit('board', { color: global.current_color
