@@ -58,6 +58,7 @@ function drawStones(){
 
   var pos_x = 0, pos_y = 500;
 
+  //Map gameboard array to color
   function getStoneColor(i){
     switch(window.stones[Math.abs(i - 80)]){
       case 0:
@@ -65,7 +66,11 @@ function drawStones(){
       case -1:
         return black_grd;
       case 1:
-        return white_grd;
+        //check for FF and return flat white instead of gradient
+        if($.browser.mozilla == true)
+          return "white";
+        else
+          return white_grd;
     }
   };
 

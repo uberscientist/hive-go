@@ -54,3 +54,7 @@ hr {
     #page-wrap .message .timer {
       font-size: 2em;
     }
+
+    #page-wrap .message .twitter-share-button {
+      display: block;
+    }
