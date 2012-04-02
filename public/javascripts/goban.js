@@ -72,7 +72,7 @@ function getStoneColor(i, stones, heat){
 function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
-  window.heatOverlay = new Kinetic.Layer();
+  var heatOverlay = new Kinetic.Layer();
   window.stoneOverlay = new Kinetic.Layer();
   var pos_x = 0, pos_y = 500;
 
@@ -103,7 +103,6 @@ function drawStones(data){
       if(heat[80-i] != 0){
         vote_display.setPosition(circle.x - 5, circle.y - 15);
         vote_display.setText(circle.heat);
-        heatOverlay.draw();
       }
 
       if(i !== 0 && i%9 == 0){  // If end of row
