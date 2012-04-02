@@ -1,11 +1,10 @@
 Hive Go
 ========
 Voting based go game.  people vote for where the current color should place the stone, highest voted coordinate
-gets commited to the game after alloted time  and the next color turn begins.<br/><br/>
-Loop until 2 passes are majority voted succesfully.
+gets commited to the game after alloted time  and the next color turn begins. Server/Client in JS.
 
-### Progress ###
-I just started working on this... plan to use Node.JS, (hi))Redis, Express, KineticJS, GnuGo and cron.d :)
+### Modules ###
+Run `npm install` to install dependencies after cloning
 
-### MODULES ###
-I'm compiling everything (just hiredis so far) on an Arch  x86_64  machine. You may want to `npm install` the dependencies if you attempt to clone this.
+### Thank yous ###
+Justin Kramer for writing <a href="https://github.com/jkk/eidogo">Eidogo</a> in javascript.  I've taken and modified some files in order to run rules/board serverside.  I guess my code has now been infected with the AGPLv3 :)
