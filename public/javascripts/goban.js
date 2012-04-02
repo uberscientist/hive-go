@@ -76,21 +76,12 @@ function drawStones(data){
   var pos_x = 0, pos_y = 500;
   window.stoneOverlay = new Kinetic.Layer();
 
-  //Vote display
-  var vote_display = new Kinetic.Text({
-    text:"",
-    fontFamily: "Chelsea Market",
-    fontSize: 28,
-    textFill: "black", 
-    textStroke: "white", 
-  });
 
   for(var i = 80; i >= 0; i--){
     (function(){
       pos_x++
 
       var circle = new Kinetic.Circle({
-
         x: pos_x * 50,
         y: pos_y - 50,
         radius: 23,
@@ -98,9 +89,16 @@ function drawStones(data){
         heat: heat[80-i],
         fill: getStoneColor(i, stones, heat),
         alpha: (heat[80-i] != 0) ? .2 : 1,
-
-        //Creates and binds point object to circle to pass to eidogo board/rules
         point: { x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
+      });
+
+      //Vote counter text object
+      var vote_display = new Kinetic.Text({
+        text:"",
+        fontFamily: "Chelsea Market",
+        fontSize: 28,
+        textFill: "black", 
+        textStroke: "white", 
       });
 
       if(heat[80-i] != 0){
