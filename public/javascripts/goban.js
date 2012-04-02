@@ -91,18 +91,24 @@ function drawStones(data){
         point: { x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
       });
 
-      //Vote counter text object
-      var vote_display = new Kinetic.Text({
-        text:"",
-        fontFamily: "Chelsea Market",
-        fontSize: 28,
-        textFill: "black", 
-        textStroke: "white", 
-      });
+      if(circle.heat != 0){
+        var vote_display = new Kinetic.Text({    //Vote counter text object
+          text:"",
+          fontFamily: "Chelsea Market",
+          fontSize: 28,
+          textFill: "black", 
+          textStroke: "white", 
+        });
 
-      if(heat[80-i] != 0){
-        vote_display.setPosition(circle.x - 5, circle.y - 15);
+        if(circle.heat == 1)
+          vote_display.setPosition(circle.x - 5, circle.y - 14);
+        else if(circle.heat > 1 && circle.heat < 10)
+          vote_display.setPosition(circle.x - 10, circle.y - 14);
+        else //Double digits
+          vote_display.setPosition(circle.x - 15, circle.y - 14);
+
         vote_display.setText(circle.heat);
+        heatOverlay.add(vote_display);
       }
 
       if(i !== 0 && i%9 == 0){  // If end of row
@@ -134,7 +140,6 @@ function drawStones(data){
         socket.emit("vote", { coord: this.point });
       });
 
-      heatOverlay.add(vote_display);
       stoneOverlay.add(circle);
     }());
   }
@@ -142,15 +147,6 @@ function drawStones(data){
   /**
   * Create "pass" and "resign" buttons
   */
-  var pass_rect = new Kinetic.Rect({
-    x: 100,
-    y: 480,
-    width: 100,
-    height: 40,
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3
-  });
 
   var pass_text = new Kinetic.Text({
     x: 150,
@@ -159,20 +155,14 @@ function drawStones(data){
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
+    fill: "#A36400",
+    stroke: "#7A4B00",
+    strokeWidth: 3,
+    padding: 15,
     align: "center",
     verticalAlign: "middle"
   });
-
-  var resign_rect = new Kinetic.Rect({
-    x: 300,
-    y: 480,
-    width: 100,
-    height: 40,
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3
-  });
-
+ 
   var resign_text = new Kinetic.Text({
     x: 350,
     y: 500,
@@ -180,10 +170,15 @@ function drawStones(data){
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
+    fill: "#A36400",
+    stroke: "#7A4B00",
+    strokeWidth: 3,
+    padding: 15,
     align: "center",
     verticalAlign: "middle"
   });
 
+  //Functions to deal with mouse events
   function button_over(button){
     button.setFill("#F6AA31");
     stoneOverlay.draw();
@@ -193,46 +188,27 @@ function drawStones(data){
     stoneOverlay.draw();
   }
 
-  pass_rect.on("mouseover", function(){
+  //event listeners
+  pass_text.on("mouseover", function(){
     button_over(this);
   });
-  pass_text.on("mouseover", function(){
-    button_over(pass_rect);
-  });
-  pass_rect.on("mouseout", function(){
-    button_out(this);
-  });
   pass_text.on("mouseout", function(){
-    button_out(pass_rect);
-  });
-  pass_rect.on("mouseup", function(){
-    socket.emit("vote", { coord: "pass" } );
+    button_out(this);
   });
   pass_text.on("mouseup", function(){
     socket.emit("vote", { coord: "pass" } );
   });
 
-  resign_rect.on("mouseover", function(){
+  resign_text.on("mouseover", function(){
     button_over(this);
   });
-  resign_text.on("mouseover", function(){
-    button_over(resign_rect);
-  });
-  resign_rect.on("mouseout", function(){
-    button_out(this);
-  });
   resign_text.on("mouseout", function(){
-    button_out(resign_rect);
-  });
-  resign_rect.on("mouseup", function(){
-    socket.emit("vote", { coord: "resign" } );
+    button_out(this);
   });
   resign_text.on("mouseup", function(){
     socket.emit("vote", { coord: "resign" } );
   });
 
-  stoneOverlay.add(pass_rect);
-  stoneOverlay.add(resign_rect);
   stoneOverlay.add(pass_text);
   stoneOverlay.add(resign_text);
 
@@ -265,7 +241,7 @@ function drawStones(data){
     stoneOverlay.add(number);
   }
   
-  //Draw board, then add stones after everything else is done
+  //Draw board, then add stones/votes after everything else is done
   drawBoardBg(function(){
     stage.add(heatOverlay);
     stage.add(stoneOverlay);
