@@ -72,10 +72,9 @@ function getStoneColor(i, stones, heat){
 function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
-  var heatOverlay = new Kinetic.Layer();
-  var pos_x = 0, pos_y = 500;
+  window.heatOverlay = new Kinetic.Layer();
   window.stoneOverlay = new Kinetic.Layer();
-
+  var pos_x = 0, pos_y = 500;
 
   for(var i = 80; i >= 0; i--){
     (function(){
