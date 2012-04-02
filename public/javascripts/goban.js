@@ -16,7 +16,7 @@ socket.on("board", function(data){
     window.current_color = "white";
   $("#current-color").html(current_color);
 
-  drawStones(data.stones);
+  drawStones(data);
 });
 
 // Functions
@@ -40,8 +40,8 @@ function updateMessage(message){
   $("div.voting").hide().html(message).fadeIn("slow");
 }
 
-function drawStones(stones){
-  window.stoneOverlay = new Kinetic.Layer();
+//Map gameboard array to color
+function getStoneColor(i, stones, heat){
 
   //Setup gradients for stones
   var context = stoneOverlay.getContext();
@@ -53,22 +53,30 @@ function drawStones(stones){
   black_grd.addColorStop(0, "#d8d8d8");
   black_grd.addColorStop(1, "#000000");
 
-  var pos_x = 0, pos_y = 500;
-
-  //Map gameboard array to color
-  function getStoneColor(i, stones){
-    switch(stones[Math.abs(i - 80)]){
-      case 0:
+  switch(stones[Math.abs(i - 80)]){
+    case 0:
+      if(heat[80-i] == 0)
         return "transparent";
-      case -1:
-        return black_grd;
-      case 1:
-        if($.browser.mozilla == true)   // check for FF and 
-          return "white";               // return flat white instead of gradient
-        else
-          return white_grd;
-    }
-  };
+      else
+        return "#8F0000";             // Return red for positions with votes
+    case -1:
+      return black_grd;
+    case 1:
+      if($.browser.mozilla == true)   // check for FF and 
+        return "white";               // return flat white instead of gradient
+      else
+        return white_grd;
+  }
+};
+
+function drawStones(data){
+  var stones = data.stones;
+  var heat = data.heat;
+
+  window.stoneOverlay = new Kinetic.Layer();
+  var heatOverlay = new Kinetic.Layer();
+
+  var pos_x = 0, pos_y = 500;
 
   for(var i = 80; i >= 0; i--){
     (function(){
@@ -80,10 +88,12 @@ function drawStones(stones){
         y: pos_y - 50,
         radius: 23,
         name: i,
-        fill: getStoneColor(i, stones),
+        heat: heat[80-i],
+        fill: getStoneColor(i, stones, heat),
+        alpha: (heat[80-i] < 10 && heat[80-i] != 0) ? (heat[80-i] / 10) : 1,
 
         //Creates and binds point object to circle to pass to eidogo board/rules
-        point: {x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
+        point: { x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
       });
 
       if(i !== 0 && i%9 == 0){  // If end of row
@@ -92,17 +102,31 @@ function drawStones(stones){
       }
 
       circle.on("mouseover", function(){
-        if(getStoneColor(circle.name, stones) != "transparent")
+        var circ_fill = getStoneColor(circle.name, stones, heat);
+
+        if(circ_fill == "#8F0000"){
+          vote_display.setPosition(this.x - 30 , this.y - 37);
+          vote_display.setText(this.heat);
+          vote_display.show();
+          heatOverlay.draw();
+          stoneOverlay.draw();
           return;
+        } else if(circ_fill != "transparent"){
+          return;
+        }
         this.setFill(current_color);
         this.setAlpha(.5);
         stoneOverlay.draw();
       })
 
       circle.on("mouseout", function(){
-        this.setFill(getStoneColor(this.name, stones));
-        this.setAlpha(1);
-        stoneOverlay.draw();
+        this.setFill(getStoneColor(this.name, stones, heat));
+        vote_display.hide();
+        heatOverlay.draw();
+        if(this.fill != "#8F0000"){
+          this.setAlpha(1);
+          stoneOverlay.draw();
+        }
       })
 
       circle.on("mouseup", function(){
@@ -112,6 +136,17 @@ function drawStones(stones){
       stoneOverlay.add(circle);
     }());
   }
+
+  //Vote display
+  var vote_display = new Kinetic.Text({
+    text:"",
+    fontFamily: "Chelsea Market",
+    fontSize: 26,
+    visible: false,
+    textFill: "#4B60BD", 
+  });
+
+  heatOverlay.add(vote_display);
 
   /**
   * Create "pass" and "resign" buttons
@@ -242,6 +277,7 @@ function drawStones(stones){
   //Draw board, then add stones after everything else is done
   drawBoardBg(function(){
     stage.add(stoneOverlay);
+    stage.add(heatOverlay);
   });
 }
 

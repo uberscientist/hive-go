@@ -48,6 +48,15 @@ app.configure('production', function(){
 });
 
 // Functions
+function sendBoardInfo(){
+    io.sockets.emit('board', { color: global.current_color
+                            , stones: go.rules.board.stones
+                            ,   heat: go.rules.board.markers
+                            , passes: go.rules.board.passes
+                            ,resigns: go.rules.board.resigns });
+}
+
+
 function vote(coord, ip, callback){
   db.sismember('go:already-voted', ip, function(err, data){
     if(err) throw err;
@@ -57,14 +66,18 @@ function vote(coord, ip, callback){
 
     } else {
 
-      //Increase coordinate score by 1
-      db.multi()
-        .zincrby('go:votes', 1, JSON.stringify(coord))
-        .sadd('go:already-voted', ip)
-        .exec(function(err){
-            if(err) throw err;
-            callback(false);
-        });
+      //update vote array
+      go.voteStone(coord, function(coord){
+
+        //Increase coordinate score by 1
+        db.multi()
+          .zincrby('go:votes', 1, JSON.stringify(coord))
+          .sadd('go:already-voted', ip)
+          .exec(function(err){
+              if(err) throw err;
+              callback(false);
+          });
+      });
     }
   });
 };
@@ -84,8 +97,9 @@ function updateBoard(){
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
-       //Reset countdown
+      //Reset countdown
       next_round = new Date().addSeconds(3).getTime();
+
       //clear IPs and votes
       db.multi()
         .del('go:already-voted')
@@ -100,8 +114,8 @@ function updateBoard(){
             global.current_color = -global.current_color;
 
           io.sockets.emit('message', { message: 'until next vote count' });
-          io.sockets.emit('board', { color: global.current_color
-                                  , stones: go.rules.board.stones });
+
+          sendBoardInfo();
         });
     });
   });
@@ -120,13 +134,9 @@ io.sockets.on('connection', function(socket){
     .scard('go:already-voted')
     .zrange('go:votes', 0, -1, 'withscores')
     .exec(function(err, results){
-      console.log(results);
 
-      io.sockets.emit('board', { color: global.current_color
-                                , stones: go.rules.board.stones
-                                , unique_votes: results[0]
-                                , heat_points: results[1] });
-    });
+      sendBoardInfo();
+     });
 
  
   socket.on('vote', function(data){
@@ -137,6 +147,7 @@ io.sockets.on('connection', function(socket){
             socket.emit('message', { message: 'Your IP has already voted for this turn' })
           } else {
             socket.emit('message', { message: 'Every vote counts! Thank you' })
+            sendBoardInfo();
           }
         });
       } else {
