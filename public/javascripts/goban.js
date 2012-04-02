@@ -109,8 +109,6 @@ function drawStones(data){
           vote_display.setText(this.heat);
           vote_display.show();
           heatOverlay.draw();
-          stoneOverlay.draw();
-          return;
         } else if(circ_fill != "transparent"){
           return;
         }
