@@ -72,11 +72,18 @@ function getStoneColor(i, stones, heat){
 function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
-
-  window.stoneOverlay = new Kinetic.Layer();
   var heatOverlay = new Kinetic.Layer();
-
   var pos_x = 0, pos_y = 500;
+  window.stoneOverlay = new Kinetic.Layer();
+
+  //Vote display
+  var vote_display = new Kinetic.Text({
+    text:"",
+    fontFamily: "Chelsea Market",
+    fontSize: 28,
+    textFill: "black", 
+    textStroke: "white", 
+  });
 
   for(var i = 80; i >= 0; i--){
     (function(){
@@ -90,11 +97,17 @@ function drawStones(data){
         name: i,
         heat: heat[80-i],
         fill: getStoneColor(i, stones, heat),
-        alpha: (heat[80-i] < 10 && heat[80-i] != 0) ? (heat[80-i] / 10) : 1,
+        alpha: (heat[80-i] != 0) ? .2 : 1,
 
         //Creates and binds point object to circle to pass to eidogo board/rules
         point: { x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
       });
+
+      if(heat[80-i] != 0){
+        vote_display.setPosition(circle.x - 5, circle.y - 15);
+        vote_display.setText(circle.heat);
+        heatOverlay.draw();
+      }
 
       if(i !== 0 && i%9 == 0){  // If end of row
         pos_y -= 50;            // Go to next row
@@ -104,27 +117,21 @@ function drawStones(data){
       circle.on("mouseover", function(){
         var circ_fill = getStoneColor(circle.name, stones, heat);
 
-        if(circ_fill == "#8F0000"){
-          vote_display.setPosition(this.x - 30 , this.y - 37);
-          vote_display.setText(this.heat);
-          vote_display.show();
-          heatOverlay.draw();
-        } else if(circ_fill != "transparent"){
+        if(circ_fill != "#8F0000" && circ_fill != "transparent"){
           return;
         }
         this.setFill(current_color);
-        this.setAlpha(.5);
+        this.setAlpha(.3);
         stoneOverlay.draw();
       })
 
       circle.on("mouseout", function(){
         this.setFill(getStoneColor(this.name, stones, heat));
-        vote_display.hide();
         heatOverlay.draw();
         if(this.fill != "#8F0000"){
           this.setAlpha(1);
-          stoneOverlay.draw();
         }
+        stoneOverlay.draw();
       })
 
       circle.on("mouseup", function(){
@@ -135,14 +142,6 @@ function drawStones(data){
     }());
   }
 
-  //Vote display
-  var vote_display = new Kinetic.Text({
-    text:"",
-    fontFamily: "Chelsea Market",
-    fontSize: 26,
-    visible: false,
-    textFill: "#4B60BD", 
-  });
 
   heatOverlay.add(vote_display);
 
@@ -274,8 +273,8 @@ function drawStones(data){
   
   //Draw board, then add stones after everything else is done
   drawBoardBg(function(){
-    stage.add(stoneOverlay);
     stage.add(heatOverlay);
+    stage.add(stoneOverlay);
   });
 }
 
