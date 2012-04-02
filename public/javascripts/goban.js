@@ -1,4 +1,4 @@
-var socket = io.connect("http://localhost:3000");
+var socket = io.connect("http://mindsforge.com:3001");
 
 // Socket.IO events
 socket.on("message", function(data){
@@ -136,12 +136,10 @@ function drawStones(data){
         socket.emit("vote", { coord: this.point });
       });
 
+      heatOverlay.add(vote_display);
       stoneOverlay.add(circle);
     }());
   }
-
-
-  heatOverlay.add(vote_display);
 
   /**
   * Create "pass" and "resign" buttons
