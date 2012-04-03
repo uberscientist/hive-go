@@ -84,6 +84,16 @@ function vote(coord, ip, callback){
 };
 
 function updateBoard(){
+
+  //Set current color for tweet
+  if(global.current_color = -1)
+    var color = 'black\'s';
+  else
+    var color = 'white\'s';
+  
+  //...and tweet!
+  tweet.updateStatus('New round! 2 hours until next vote count! It\'s ' + color + ' turn.');
+
   //Get top ranked coordinate
   db.zrevrange('go:votes', 0, 0, function(err, data){
     if(err) throw err;
@@ -92,16 +102,14 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addHours(2);
-          console.log(next_round);
-          tweet.updateStatus('Test tweet, next round has begun! Go vote now, you have until ' + next_round);
+      next_round = new Date().addSeconds(10);
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addHours(2);
+      next_round = new Date().addSeconds(10);
 
       //clear IPs and votes
       db.multi()
@@ -117,14 +125,9 @@ function updateBoard(){
             global.current_color = -global.current_color;
 
 
-          if(global.current_color = -1)
-            var color = 'black\'s';
-          else
-            var color = 'white\'s';
 
           io.sockets.emit('message', { message: 'until next vote count' });
           console.log(next_round);
-          tweet.updateStatus('New round! 2 hours until next vote count! It\'s ' + color + ' turn.');
 
           sendBoardInfo();
         });
@@ -184,7 +187,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addHours(2);
+var next_round = new Date().addSeconds(10);
 
 //Start color as black (-1)
 global.current_color =  -1;
