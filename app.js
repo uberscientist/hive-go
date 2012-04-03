@@ -102,14 +102,14 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addSeconds(10);
+      next_round = new Date().addHours(1);
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addSeconds(10);
+      next_round = new Date().addHours(1);
 
       //clear IPs and votes
       db.multi()
@@ -187,7 +187,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addSeconds(10);
+var next_round = new Date().addHours(1);
 
 //Start color as black (-1)
 global.current_color =  -1;
