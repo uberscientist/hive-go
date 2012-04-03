@@ -1,4 +1,4 @@
-var socket = io.connect("http://mindsforge.com:3001");
+var socket = io.connect("http://localhost:3001");
 
 // Socket.IO events
 socket.on("message", function(data){
@@ -127,12 +127,18 @@ function drawStones(data){
           textStroke: "white", 
         });
 
+        //Adjust vote size based on #
         if(circle.heat == 1)
           vote_display.setPosition(circle.x - 5, circle.y - 14);
         else if(circle.heat > 1 && circle.heat < 10)
           vote_display.setPosition(circle.x - 10, circle.y - 14);
-        else //Double digits
-          vote_display.setPosition(circle.x - 15, circle.y - 14);
+        else if(circle.heat > 9 && circle.heat < 20){ //Double digits
+          vote_display.setFontSize(25);
+          vote_display.setPosition(circle.x - 13, circle.y - 14);
+        } else {
+          vote_display.setFontSize(25);
+          vote_display.setPosition(circle.x - 19, circle.y - 14);
+        }
 
         vote_display.setText(circle.heat);
         heatOverlay.add(vote_display);

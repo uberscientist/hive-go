@@ -52,18 +52,31 @@ exports.playMove = function (coord, color, callback) {
 };
 
 //function to collect votes into 'markers' and 'passes'/'resigns'
-exports.voteStone = function (coord, callback){
+exports.voteStone = function (old_coord, coord, callback){
+
+  if(old_coord != false){
+    if(old_coord == 'pass'){
+      rules.board.passes -= 1;
+    }
+    else if(old_coord == 'resign'){
+      rules.board.resigns -= 1;
+    }
+    else {
+      rules.board.markers[old_coord.y * 9 + old_coord.x] -= 1;
+    }
+  } 
+
   if (coord == 'pass'){
     rules.board.passes += 1;
-    callback(coord);
+    callback();
 
   } else if (coord == 'resign'){
     rules.board.resigns += 1;
-    callback(coord);
+    callback();
 
   } else {
     rules.board.markers[coord.y * 9 + coord.x] += 1;
-    callback(coord);
+    callback();
   }
 }
 

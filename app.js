@@ -59,24 +59,30 @@ function sendBoardInfo(){
 
 
 function vote(coord, ip, callback){
-  db.sismember('go:already-voted', ip, function(err, data){
+  db.exists('go:'+ip, function(err, data){
     if(err) throw err;
-    
-    if(data == 1){
-      callback(true);
 
+    if(data == 0){
+      db.multi()
+        .set('go:'+ip, JSON.stringify(coord))
+        .zincrby('go:votes', 1, JSON.stringify(coord))
+        .exec(function(err, results){
+          if(err) throw err;
+          go.voteStone(false, coord, function(){
+            callback();
+          });
+        });
     } else {
-
-      //update vote array
-      go.voteStone(coord, function(coord){
-
-        //Increase coordinate score by 1
+      db.get('go:'+ip, function(err, old_coord){
         db.multi()
+          .zincrby('go:votes', -1, old_coord)
           .zincrby('go:votes', 1, JSON.stringify(coord))
-          .sadd('go:already-voted', ip)
+          .set('go:'+ip, JSON.stringify(coord))
           .exec(function(err){
-              if(err) throw err;
-              callback(false);
+            if(err) throw err;
+            go.voteStone(JSON.parse(old_coord), coord, function(){
+              callback();
+            });
           });
       });
     }
@@ -112,25 +118,20 @@ function updateBoard(){
       next_round = new Date().addHours(1);
 
       //clear IPs and votes
-      db.multi()
-        .del('go:already-voted')
-        .del('go:votes')
-        .exec(function(err){
-          if(err) throw err;
+      db.del('go:votes', function(err){
+        if(err) throw err;
 
-          //Reverse color, or let reset if end-game
-          if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign')
-            global.current_color = global.current_color;
-          else
-            global.current_color = -global.current_color;
+        //Reverse color, or let reset if end-game
+        if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign')
+          global.current_color = global.current_color;
+        else
+          global.current_color = -global.current_color;
 
+        io.sockets.emit('message', { message: 'until next vote count' });
+        console.log(next_round);
 
-
-          io.sockets.emit('message', { message: 'until next vote count' });
-          console.log(next_round);
-
-          sendBoardInfo();
-        });
+        sendBoardInfo();
+      });
     });
   });
 }
@@ -143,26 +144,15 @@ app.get('/', routes.index);
 io.sockets.on('connection', function(socket){
   var ip = socket.handshake.address.address;
 
-  //On connect send stuff from Redis so they can draw the page
-  db.multi()
-    .scard('go:already-voted')
-    .zrange('go:votes', 0, -1, 'withscores')
-    .exec(function(err, results){
-
-      sendBoardInfo();
-     });
-
+  //On connect send board info
+  sendBoardInfo();
  
   socket.on('vote', function(data){
     go.checkMove(data.coord, function(check){
       if(check){
-        vote(data.coord, ip, function(voted){
-          if(voted){
-            socket.emit('message', { message: 'Your IP has already voted for this turn' })
-          } else {
-            socket.emit('message', { message: 'Every vote counts! Thank you' })
-            sendBoardInfo();
-          }
+        vote(data.coord, ip, function(){
+          socket.emit('message', { message: 'Every vote counts! Thank you' })
+          sendBoardInfo();
         });
       } else {
         socket.emit('message', { message: 'Invalid Move' });
