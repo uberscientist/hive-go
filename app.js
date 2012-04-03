@@ -16,8 +16,8 @@ var express = require('express')
 //Lowering debug level to clear up console
 io.set('log level', 1);
 
-// Set round time in hours
-var round_time = 1;
+// Set round time in minutes
+var round_time = 21;
 
 // Extending prototypes
 Date.prototype.addHours = function(h){
@@ -27,8 +27,8 @@ Date.prototype.addHours = function(h){
   return this;
 }
 
-Date.prototype.addSeconds = function(s){
-  this.setSeconds(this.getSeconds() + s);
+Date.prototype.addMinutes = function(m){
+  this.setMinutes(this.getMinutes() + m);
   return this;
 }
 
@@ -61,12 +61,15 @@ function sendBoardInfo(){
 
 
 function vote(coord, ip, callback){
+  var expire_time = Math.round(next_round.getTime()/1000);
+
   db.exists('go:'+ip, function(err, data){
     if(err) throw err;
 
     if(data == 0){
       db.multi()
         .set('go:'+ip, JSON.stringify(coord))
+        .expireat('go:'+ip, expire_time)
         .zincrby('go:votes', 1, JSON.stringify(coord))
         .exec(function(err, results){
           if(err) throw err;
@@ -80,6 +83,7 @@ function vote(coord, ip, callback){
           .zincrby('go:votes', -1, old_coord)
           .zincrby('go:votes', 1, JSON.stringify(coord))
           .set('go:'+ip, JSON.stringify(coord))
+          .expireat('go:'+ip, expire_time)
           .exec(function(err){
             if(err) throw err;
             go.voteStone(JSON.parse(old_coord), coord, function(){
@@ -100,7 +104,7 @@ function updateBoard(){
     var color = 'white\'s';
   
   //...and tweet!
-  tweet.updateStatus('New round! '+ round_time +' hour(s) until next vote count! It\'s ' + color + ' turn.');
+  tweet.updateStatus('New round! '+ round_time +' minutess until next vote count! It\'s ' + color + ' turn.');
 
   //Get top ranked coordinate
   db.zrevrange('go:votes', 0, 0, function(err, data){
@@ -110,16 +114,16 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addHours(round_time);
+      next_round = new Date().addMinutes(round_time);
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addHours(round_time);
+      next_round = new Date().addMinutes(round_time);
 
-      //clear IPs and votes
+      //clear votes
       db.del('go:votes', function(err){
         if(err) throw err;
 
@@ -179,7 +183,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addHours(round_time);
+var next_round = new Date().addMinutes(round_time);
 
 //Start color as black (-1)
 global.current_color =  -1;
