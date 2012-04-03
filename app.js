@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -16,6 +15,9 @@ var express = require('express')
 
 //Lowering debug level to clear up console
 io.set('log level', 1);
+
+// Set round time in hours
+var round_time = 1;
 
 // Extending prototypes
 Date.prototype.addHours = function(h){
@@ -98,7 +100,7 @@ function updateBoard(){
     var color = 'white\'s';
   
   //...and tweet!
-  tweet.updateStatus('New round! 2 hours until next vote count! It\'s ' + color + ' turn.');
+  tweet.updateStatus('New round! '+ round_time +' hour(s) until next vote count! It\'s ' + color + ' turn.');
 
   //Get top ranked coordinate
   db.zrevrange('go:votes', 0, 0, function(err, data){
@@ -108,14 +110,14 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addHours(1);
+      next_round = new Date().addHours(round_time);
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addHours(1);
+      next_round = new Date().addHours(round_time);
 
       //clear IPs and votes
       db.del('go:votes', function(err){
@@ -177,7 +179,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addHours(1);
+var next_round = new Date().addHours(round_time);
 
 //Start color as black (-1)
 global.current_color =  -1;
