@@ -74,6 +74,8 @@ function vote(coord, ip, callback){
     if(err) throw err;
 
     if(data == 0){
+
+      //First time voting??
       db.multi()
         .set('go:'+ip, JSON.stringify(coord))
         .expireat('go:'+ip, expire_time)
@@ -85,6 +87,8 @@ function vote(coord, ip, callback){
           });
         });
     } else {
+
+      //Subsequent votes...
       db.get('go:'+ip, function(err, old_coord){
         db.multi()
           .zincrby('go:votes', -1, old_coord)
@@ -127,21 +131,18 @@ function updateBoard(){
           } else {
             global.current_color = -global.current_color;
           }
+          //...and tweet!
+          tweet.updateStatus('New round! '+ round_time +' minutes until next vote count!');
 
           io.sockets.emit('message', { message: 'until next vote count' });
 
           sendBoardInfo();
         });
       });
-
     } else {
-
       next_round = new Date().addMinutes(round_time);
       return;
     }
-
-  //...and tweet!
-  tweet.updateStatus('New round! '+ round_time +' minutes until next vote count!');
   });
 }
 
