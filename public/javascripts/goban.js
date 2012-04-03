@@ -69,6 +69,26 @@ function getStoneColor(i, stones, heat){
   }
 };
 
+function drawInfo(data){
+  var passes = data.passes;
+  var resigns = data.resigns;
+
+  var pass_count = new Kinetic.Text({
+    x: 150,
+    y: 500,
+    text: "",
+    fontSize: 20,
+    fontFamily: "Chelsea Market",
+    textFill: "black",
+    fill: "#A36400",
+    stroke: "#7A4B00",
+    strokeWidth: 3,
+    padding: 15,
+    align: "center",
+    verticalAlign: "middle"
+  });
+}
+
 function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
@@ -151,7 +171,7 @@ function drawStones(data){
   var pass_text = new Kinetic.Text({
     x: 150,
     y: 500,
-    text: "Pass",
+    text: "Pass " + data.passes,
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
@@ -166,7 +186,7 @@ function drawStones(data){
   var resign_text = new Kinetic.Text({
     x: 350,
     y: 500,
-    text: "Resign",
+    text: "Resign " + data.resigns,
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
@@ -183,6 +203,7 @@ function drawStones(data){
     button.setFill("#F6AA31");
     stoneOverlay.draw();
   }
+
   function button_out(button){
     button.setFill("#A36400");
     stoneOverlay.draw();
@@ -212,34 +233,8 @@ function drawStones(data){
   stoneOverlay.add(pass_text);
   stoneOverlay.add(resign_text);
 
-  //Add coordinates
-  for(var i=0; i < 9; i++){
-    alpha = new Kinetic.Text({
-      x: 50 + i * 50,
-      y: 18,
-      fontFamily: "Chelsea Market",
-      fontSize: 10,
-      text: (i == 8) ? "J" : String.fromCharCode(65 + i),
-      textFill: "black",
-      align: "center",
-      verticalAlign: "middle"
-    });
-    stoneOverlay.add(alpha);
-  }
-  
-  for(var i=0; i < 9; i++){
-    number = new Kinetic.Text({
-      x: 18,
-      y: 50 + i * 50,
-      fontFamily: "Chelsea Market",
-      fontSize: 10,
-      text: 9 - i,
-      textFill: "black",
-      align: "center",
-      verticalAlign: "middle"
-    });
-    stoneOverlay.add(number);
-  }
+  //Add pass/resign votes to stoneOverlay
+//  drawInfo(data);
   
   //Draw board, then add stones/votes after everything else is done
   drawBoardBg(function(){
@@ -265,8 +260,39 @@ function drawBoardBg(callback){
     var gobanBack = gobanBack || new Kinetic.Rect({ width: 500,
                                                     height: 550,
                                                       fill: "#CC7D00" });
+
     gobanLayer.add(gobanBack);
     gobanLayer.add(gobanGrid);
+
+    //Add coordinates
+    for(var i=0; i < 9; i++){
+      alpha = new Kinetic.Text({
+        x: 50 + i * 50,
+        y: 18,
+        fontFamily: "Chelsea Market",
+        fontSize: 10,
+        text: (i == 8) ? "J" : String.fromCharCode(65 + i),
+        textFill: "black",
+        align: "center",
+        verticalAlign: "middle"
+      });
+      gobanLayer.add(alpha);
+    }
+    
+    for(var i=0; i < 9; i++){
+      number = new Kinetic.Text({
+        x: 18,
+        y: 50 + i * 50,
+        fontFamily: "Chelsea Market",
+        fontSize: 10,
+        text: 9 - i,
+        textFill: "black",
+        align: "center",
+        verticalAlign: "middle"
+      });
+      gobanLayer.add(number);
+    }
+
     stage.add(gobanLayer);
     callback();
   };
