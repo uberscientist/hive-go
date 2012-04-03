@@ -98,7 +98,7 @@ function vote(coord, ip, callback){
 function updateBoard(){
 
   //Set current color for tweet
-  if(global.current_color = -1)
+  if(global.current_color = 1)
     var color = 'black\'s';
   else
     var color = 'white\'s';
