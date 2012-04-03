@@ -20,6 +20,13 @@ socket.on("board", function(data){
 });
 
 // Functions
+function pad(num){
+  var str = '' + num;
+  while (str.length < 2){
+    str = '0' + str;
+  }
+  return str;
+}
 function updateTimer(time){
   var SEC = 1000,           //Timer variables 
       MIN = SEC * 60,
@@ -30,9 +37,9 @@ function updateTimer(time){
     return;
   }
 
-  var hour = Math.floor(time/HOUR);
-  var min = Math.floor(time/MIN) - hour * 60;
-  var sec = Math.floor(time/SEC) - (hour * 60 * 60) - (min * 60);
+  var hour = pad(Math.floor(time/HOUR));
+  var min = pad(Math.floor(time/MIN) - hour * 60);
+  var sec = pad(Math.floor(time/SEC) - (hour * 60 * 60) - (min * 60));
   $("div.timer").html(hour + ":" + min + ":" + sec);
 }
 
