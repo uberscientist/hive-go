@@ -4,39 +4,49 @@ require('./board.js');
 require('./rules.js');
 
 // Setup Eidogo board
-exports.pass = pass = 0;
+exports.pass_in_a_row = pass_in_a_row = 0;
 var board = new eidogo.Board;
 var rules = exports.rules = new eidogo.Rules(board);
+
+function resetCounters(){
+    //Reset vote array + pass/resigns
+    rules.board.markers = rules.board.makeBoardArray(0);
+    rules.board.passes = 0;
+    rules.board.resigns = 0;
+}
 
 exports.playMove = function (coord, color, callback) {
   if (coord == 'pass') {
 
+    exports.pass_in_a_row = pass_in_a_row += 1;
+
     //Check if both players have passed in row
-    exports.pass = pass += 1;
-    if(pass == 2){
-      pass = 0;
+    if(pass_in_a_row == 2){
+      exports.pass_in_a_row = pass_in_a_row = 0;
       rules.board.reset();
       global.current_color = -1;
     }
+
+    resetCounters();
     callback('pass');
+
   } else if (coord == 'resign') {
-    pass = 0;
+    exports.pass_in_a_row = pass_in_a_row = 0;
 
     //reset game if resign
     rules.board.reset();
     global.current_color = -1;
+
+    resetCounters();
     callback('resign');
   } else if (coord) {
-    pass = 0;
+    exports.pass_in_a_row = pass_in_a_row = 0;
 
     //Add stone  
     board.addStone(coord, color);
     rules.apply(coord, color);
 
-    //Reset vote array + pass/resigns
-    rules.board.markers = rules.board.makeBoardArray(0);
-    rules.board.passes = 0;
-    rules.board.resigns = 0;
+    resetCounters();
     callback(coord);
   }
 };

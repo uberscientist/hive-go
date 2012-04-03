@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 var go = require('./eidogo'),
+    tweet = require('tweet.js'),
 
     //Redis client
     db = require('db.js');
@@ -91,14 +92,14 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addSeconds(3).getTime();
+      next_round = new Date().addSeconds(30).getTime();
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addSeconds(3).getTime();
+      next_round = new Date().addSeconds(30).getTime();
 
       //clear IPs and votes
       db.multi()
@@ -108,7 +109,7 @@ function updateBoard(){
           if(err) throw err;
 
           //Reverse color, or let reset if end-game
-          if((coord == 'pass' && go.pass == 2) || coord == 'resign')
+          if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign')
             global.current_color = global.current_color;
           else
             global.current_color = -global.current_color;
@@ -173,7 +174,7 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addSeconds(3).getTime();
+var next_round = new Date().addSeconds(30).getTime();
 
 //Start color as black (-1)
 global.current_color =  -1;
