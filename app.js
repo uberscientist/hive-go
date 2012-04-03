@@ -92,14 +92,16 @@ function updateBoard(){
     if(data.length > 0){
       data = JSON.parse(data);
     } else {
-      next_round = new Date().addSeconds(30).getTime();
+      next_round = new Date().addHours(2);
+          console.log(next_round);
+          tweet.updateStatus('Test tweet, next round has begun! Go vote now, you have until ' + next_round);
       return;
     }
     
     //Update eidogo board
     go.playMove(data, global.current_color, function(coord){
       //Reset countdown
-      next_round = new Date().addSeconds(30).getTime();
+      next_round = new Date().addHours(2);
 
       //clear IPs and votes
       db.multi()
@@ -114,7 +116,15 @@ function updateBoard(){
           else
             global.current_color = -global.current_color;
 
+
+          if(global.current_color = -1)
+            var color = 'black\'s';
+          else
+            var color = 'white\'s';
+
           io.sockets.emit('message', { message: 'until next vote count' });
+          console.log(next_round);
+          tweet.updateStatus('New round! 2 hours until next vote count! It\'s ' + color + ' turn.');
 
           sendBoardInfo();
         });
@@ -162,7 +172,7 @@ io.sockets.on('connection', function(socket){
 //Timer updater
 function untilNext(){
   var now = new Date().getTime();
-  var countdown = next_round - now;
+  var countdown = next_round.getTime() - now;
   io.sockets.emit('tick', { until_next: countdown });
 
   //At end of round update board
@@ -174,10 +184,10 @@ function untilNext(){
 setInterval(untilNext, 1000);
 
 // Initialization and interval timer
-var next_round = new Date().addSeconds(30).getTime();
+var next_round = new Date().addHours(2);
 
 //Start color as black (-1)
 global.current_color =  -1;
 
-app.listen(3000);
+app.listen(3001);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
