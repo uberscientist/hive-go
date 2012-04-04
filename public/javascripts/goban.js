@@ -33,7 +33,7 @@ function updateTimer(time){
       HOUR = MIN * 60;
 
   if(time <= 0){
-    $("div.timer").html("-:-:-");
+    $("div.timer").html("00:00:00");
     return;
   }
 

@@ -17,9 +17,9 @@ var express = require('express')
 io.set('log level', 1);
 
 // Set round time in minutes
-var round_time = 21;
+var round_time = 10;
 
-// Extending prototypes
+// Extending date prototype
 Date.prototype.addHours = function(h){
 
   //Thanks kennebec from stackoverflow
@@ -31,6 +31,12 @@ Date.prototype.addMinutes = function(m){
   this.setMinutes(this.getMinutes() + m);
   return this;
 }
+
+Date.prototype.addSeconds = function(s){
+  this.setSeconds(this.getSeconds() + s);
+  return this;
+}
+
 
 // Configuration
 app.configure(function(){
@@ -61,6 +67,7 @@ function sendBoardInfo(){
 
 
 function vote(coord, ip, callback){
+
   var expire_time = Math.round(next_round.getTime()/1000);
 
   db.exists('go:'+ip, function(err, data){
@@ -97,15 +104,6 @@ function vote(coord, ip, callback){
 
 function updateBoard(){
 
-  //Set current color for tweet
-  if(global.current_color = 1)
-    var color = 'black\'s';
-  else
-    var color = 'white\'s';
-  
-  //...and tweet!
-  tweet.updateStatus('New round! '+ round_time +' minutess until next vote count! It\'s ' + color + ' turn.');
-
   //Get top ranked coordinate
   db.zrevrange('go:votes', 0, 0, function(err, data){
     if(err) throw err;
@@ -113,32 +111,37 @@ function updateBoard(){
     //In case of no votes reset clock
     if(data.length > 0){
       data = JSON.parse(data);
+
+      //Update eidogo board
+      go.playMove(data, function(coord){
+        //Reset countdown
+        next_round = new Date().addMinutes(round_time);
+
+        //clear votes
+        db.del('go:votes', function(err){
+          if(err) throw err;
+
+          //Reverse color, or let reset if end-game
+          if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign'){
+            global.current_color = global.current_color;
+          } else {
+            global.current_color = -global.current_color;
+          }
+
+          io.sockets.emit('message', { message: 'until next vote count' });
+
+          sendBoardInfo();
+        });
+      });
+
     } else {
+
       next_round = new Date().addMinutes(round_time);
       return;
     }
-    
-    //Update eidogo board
-    go.playMove(data, global.current_color, function(coord){
-      //Reset countdown
-      next_round = new Date().addMinutes(round_time);
 
-      //clear votes
-      db.del('go:votes', function(err){
-        if(err) throw err;
-
-        //Reverse color, or let reset if end-game
-        if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign')
-          global.current_color = global.current_color;
-        else
-          global.current_color = -global.current_color;
-
-        io.sockets.emit('message', { message: 'until next vote count' });
-        console.log(next_round);
-
-        sendBoardInfo();
-      });
-    });
+  //...and tweet!
+  tweet.updateStatus('New round! '+ round_time +' minutes until next vote count!');
   });
 }
 

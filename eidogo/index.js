@@ -15,7 +15,7 @@ function resetCounters(){
     rules.board.resigns = 0;
 }
 
-exports.playMove = function (coord, color, callback) {
+exports.playMove = function (coord, callback) {
   if (coord == 'pass') {
 
     exports.pass_in_a_row = pass_in_a_row += 1;
@@ -43,8 +43,8 @@ exports.playMove = function (coord, color, callback) {
     exports.pass_in_a_row = pass_in_a_row = 0;
 
     //Add stone  
-    board.addStone(coord, color);
-    rules.apply(coord, color);
+    board.addStone(coord, global.current_color);
+    rules.apply(coord, global.current_color);
 
     resetCounters();
     callback(coord);
