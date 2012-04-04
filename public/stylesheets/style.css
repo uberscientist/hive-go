@@ -24,30 +24,18 @@ hr {
 
 #page-wrap {
   width: 800px;
-  height: 1600px;
   border-style: none solid;
   padding: 0px 20px;
-  margin: 0px auto;
+  margin: 40px auto;
 }
-  
-  #page-wrap #current-color {
-    font-weight: bold;
-  }
-
-  #page-wrap #goban {
-    width: 500px;
-    height: 550px;
-    margin: 10px auto;
-  }
-
   #page-wrap .message {
     width: 70%;
     height: 112px;
-    border-style: solid none;
+    border-style: none none solid;
     border-width: 2px;
     text-align: center;
     font-size: 1.6em;
-    padding: 10px;
+    padding: 40px 0px 10px;
     margin: 20px auto;
   }
   
@@ -55,6 +43,25 @@ hr {
       font-size: 2em;
     }
 
-    #page-wrap .message .twitter-share-button {
-      display: block;
+    #page-wrap .message #current-color {
+      font-weight: bold;
+    }
+
+  #page-wrap #goban {
+    width: 500px;
+    height: 550px;
+    margin: 10px auto;
+  }
+
+  #page-wrap .info {
+    width: 80%;
+    border-style: solid none;
+    border-width: 2px;
+    padding: 10px;
+    margin: 10px auto;
+  }
+
+    #page-wrap .info .twitter-follow-button {
+      position: relative;
+      top: 4px;
     }

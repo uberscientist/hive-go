@@ -57,12 +57,18 @@ exports.voteStone = function (old_coord, coord, callback){
   if(old_coord != false){
     if(old_coord == 'pass'){
       rules.board.passes -= 1;
+      if(rules.board.passes < 0)
+        rules.board.passes = 0;
     }
     else if(old_coord == 'resign'){
       rules.board.resigns -= 1;
+      if(rules.board.resigns < 0)
+        rules.board.resigns = 0;
     }
     else {
       rules.board.markers[old_coord.y * 9 + old_coord.x] -= 1;
+      if(rules.board.markers[old_coord.y * 9 + old_coord.x] < 0)
+        rules.board.markers[old_coord.y * 9 + old_coord.x] = 0;
     }
   } 
 

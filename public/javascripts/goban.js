@@ -169,7 +169,7 @@ function drawStones(data){
         stoneOverlay.draw();
       })
 
-      circle.on("mouseup", function(){
+      circle.on("click", function(){
         socket.emit("vote", { coord: this.point });
       });
 
@@ -188,9 +188,9 @@ function drawStones(data){
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3,
+    fill: "#F6AA31",
+    stroke: "black",
+    strokeWidth: 2,
     padding: 15,
     align: "center",
     verticalAlign: "middle"
@@ -203,9 +203,9 @@ function drawStones(data){
     fontSize: 20,
     fontFamily: "Chelsea Market",
     textFill: "black",
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3,
+    fill: "#F6AA31",
+    stroke: "black",
+    strokeWidth: 2,
     padding: 15,
     align: "center",
     verticalAlign: "middle"
@@ -213,12 +213,12 @@ function drawStones(data){
 
   //Functions to deal with mouse events
   function button_over(button){
-    button.setFill("#F6AA31");
+    button.setFill("#DB8700");
     stoneOverlay.draw();
   }
 
   function button_out(button){
-    button.setFill("#A36400");
+    button.setFill("#F6AA31");
     stoneOverlay.draw();
   }
 
@@ -229,7 +229,7 @@ function drawStones(data){
   pass_text.on("mouseout", function(){
     button_out(this);
   });
-  pass_text.on("mouseup", function(){
+  pass_text.on("click", function(){
     socket.emit("vote", { coord: "pass" } );
   });
 
@@ -239,7 +239,7 @@ function drawStones(data){
   resign_text.on("mouseout", function(){
     button_out(this);
   });
-  resign_text.on("mouseup", function(){
+  resign_text.on("click", function(){
     socket.emit("vote", { coord: "resign" } );
   });
 
@@ -272,7 +272,7 @@ function drawBoardBg(callback){
 
     var gobanBack = gobanBack || new Kinetic.Rect({ width: 500,
                                                     height: 550,
-                                                      fill: "#CC7D00" });
+                                                      fill: "#E09110" });
 
     gobanLayer.add(gobanBack);
     gobanLayer.add(gobanGrid);

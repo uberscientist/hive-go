@@ -134,8 +134,6 @@ function updateBoard(){
           //...and tweet!
           tweet.updateStatus('New round! '+ round_time +' minutes until next vote count!');
 
-          io.sockets.emit('message', { message: 'until next vote count' });
-
           sendBoardInfo();
         });
       });
@@ -161,15 +159,11 @@ io.sockets.on('connection', function(socket){
     go.checkMove(data.coord, function(check){
       if(check){
         vote(data.coord, ip, function(){
-          socket.emit('message', { message: 'Every vote counts! Thank you' })
           sendBoardInfo();
         });
-      } else {
-        socket.emit('message', { message: 'Invalid Move' });
       }
-    })
+    });
   });
-
 });
 
 //Timer updater
