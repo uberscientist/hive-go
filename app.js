@@ -17,7 +17,7 @@ var express = require('express')
 io.set('log level', 1);
 
 // Set round time in minutes
-var round_time = 10;
+var round_time = 1;
 
 // Extending date prototype
 Date.prototype.addHours = function(h){
@@ -58,13 +58,12 @@ app.configure('production', function(){
 
 // Functions
 function sendBoardInfo(){
-    io.sockets.emit('board', { color: global.current_color
-                            , stones: go.rules.board.stones
-                            ,   heat: go.rules.board.markers
-                            , passes: go.rules.board.passes
-                            ,resigns: go.rules.board.resigns });
+  io.sockets.emit('board', { color: global.current_color
+                          , stones: go.rules.board.stones
+                          ,   heat: go.rules.board.markers
+                          , passes: go.rules.board.passes
+                          ,resigns: go.rules.board.resigns });
 }
-
 
 function vote(coord, ip, callback){
 
@@ -108,6 +107,11 @@ function vote(coord, ip, callback){
 
 function updateBoard(){
 
+  //Reset timer/tweet variables
+  global.tweeted = false;
+  global.start_time = new Date().getTime();
+  global.next_round = new Date().addMinutes(round_time);
+
   //Get top ranked coordinate
   db.zrevrange('go:votes', 0, 0, function(err, data){
     if(err) throw err;
@@ -118,8 +122,6 @@ function updateBoard(){
 
       //Update eidogo board
       go.playMove(data, function(coord){
-        //Reset countdown
-        next_round = new Date().addMinutes(round_time);
 
         //clear votes
         db.del('go:votes', function(err){
@@ -131,11 +133,6 @@ function updateBoard(){
           } else {
             global.current_color = -global.current_color;
           }
-          //...and tweet!
-          tweet.updateStatus('New round! '+
-          'It\'s ' + (global.current_color == -1) ? 'white\'s' : 'black\'s'
-          round_time +
-          ' minutes until next vote count.');
 
           sendBoardInfo();
         });
@@ -179,15 +176,24 @@ function untilNext(){
   if(countdown <= 0){
     updateBoard();
   }
+
+  //halfway through round tweet round info
+  var half_way = ((next_round - start_time)/2) + start_time;
+  if(tweeted == false && now > half_way){
+    tweet.info(next_round, go.rules.board.markers);
+    global.tweeted = true;
+  }
 };
 
-setInterval(untilNext, 1000);
-
 // Initialization and interval timer
-var next_round = new Date().addMinutes(round_time);
+global.start_time = new Date().getTime();
+global.next_round = new Date().addMinutes(round_time);
 
-//Start color as black (-1)
+//Start color as black
 global.current_color =  -1;
+global.tweeted = false;
+
+setInterval(untilNext, 1000);
 
 app.listen(3001);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
