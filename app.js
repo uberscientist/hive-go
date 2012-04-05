@@ -132,7 +132,10 @@ function updateBoard(){
             global.current_color = -global.current_color;
           }
           //...and tweet!
-          tweet.updateStatus('New round! '+ round_time +' minutes until next vote count!');
+          tweet.updateStatus('New round! '+
+          'It\'s ' + (global.current_color == -1) ? 'white\'s' : 'black\'s'
+          round_time +
+          ' minutes until next vote count.');
 
           sendBoardInfo();
         });
