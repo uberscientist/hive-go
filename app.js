@@ -3,6 +3,7 @@
  */
 var go = require('./eidogo'),
     tweet = require('tweet.js'),
+    sgf = require('sgf.js'),
 
     //Redis client
     db = require('db.js');
@@ -67,6 +68,7 @@ function sendBoardInfo(){
 
 function vote(coord, ip, callback){
 
+  //Get UNIX time stamp for when all votes should expire
   var expire_time = Math.round(next_round.getTime()/1000);
 
   db.exists('go:'+ip, function(err, data){
@@ -118,10 +120,10 @@ function updateBoard(){
 
     //In case of no votes reset clock
     if(data.length > 0){
-      data = JSON.parse(data);
+      coord = JSON.parse(data);
 
       //Update eidogo board
-      go.playMove(data, function(coord){
+      go.playMove(coord, function(coord){
 
         //clear votes
         db.del('go:votes', function(err){
@@ -135,6 +137,9 @@ function updateBoard(){
           }
 
           sendBoardInfo();
+
+          //update SGF file
+          sgf.move(coord);
         });
       });
     } else {
@@ -180,7 +185,7 @@ function untilNext(){
   //halfway through round tweet round info
   var half_way = ((next_round - start_time)/2) + start_time;
   if(tweeted == false && now > half_way){
-    tweet.info(next_round, go.rules.board.markers);
+    //tweet.info(next_round, go.rules.board.markers);
     global.tweeted = true;
   }
 };

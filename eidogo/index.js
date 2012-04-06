@@ -28,7 +28,7 @@ exports.playMove = function (coord, callback) {
     }
 
     resetCounters();
-    callback('pass');
+    callback(coord);
 
   } else if (coord == 'resign') {
     exports.pass_in_a_row = pass_in_a_row = 0;
@@ -38,7 +38,7 @@ exports.playMove = function (coord, callback) {
     global.current_color = -1;
 
     resetCounters();
-    callback('resign');
+    callback(coord);
   } else if (coord) {
     exports.pass_in_a_row = pass_in_a_row = 0;
 
