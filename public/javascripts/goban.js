@@ -58,7 +58,7 @@ function getStoneColor(i, stones, heat){
 
   var black_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
   black_grd.addColorStop(0, "#000000");
-  black_grd.addColorStop(1, "#d8d8d8");
+  black_grd.addColorStop(1, "#858585");
 
   switch(stones[Math.abs(i - 80)]){
     case 0:
