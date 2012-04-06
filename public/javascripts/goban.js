@@ -52,13 +52,13 @@ function getStoneColor(i, stones, heat){
 
   //Setup gradients for stones
   var context = stoneOverlay.getContext();
-  var white_grd = context.createRadialGradient(-30, -30, 5, 0, -5, 25);
-  white_grd.addColorStop(0, "#ffffff");
-  white_grd.addColorStop(1, "#bbbbbb");
+  var white_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
+  white_grd.addColorStop(0, "#bbbbbb");
+  white_grd.addColorStop(1, "#ffffff");
 
-  var black_grd = context.createRadialGradient(-30, -30, 1, -5, -5, 25);
-  black_grd.addColorStop(0, "#d8d8d8");
-  black_grd.addColorStop(1, "#000000");
+  var black_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
+  black_grd.addColorStop(0, "#000000");
+  black_grd.addColorStop(1, "#d8d8d8");
 
   switch(stones[Math.abs(i - 80)]){
     case 0:
@@ -69,10 +69,7 @@ function getStoneColor(i, stones, heat){
     case -1:
       return black_grd;
     case 1:
-      if($.browser.mozilla == true)   // check for FF and 
-        return "white";               // return flat white instead of gradient
-      else
-        return white_grd;
+      return white_grd;
   }
 };
 
@@ -110,7 +107,7 @@ function drawStones(data){
       var circle = new Kinetic.Circle({
         x: pos_x * 50,
         y: pos_y - 50,
-        radius: 23,
+        radius: 25,
         name: i,
         heat: heat[80-i],
         fill: getStoneColor(i, stones, heat),
