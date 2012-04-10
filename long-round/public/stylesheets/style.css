@@ -28,17 +28,6 @@ hr {
   padding: 0px 20px;
   margin: 40px auto;
 }
-
-  #page-wrap #navlist li{
-    display: inline;
-    list-style-type: none;
-    padding-right: 20px;
-  }
-
-  #page-wrap nav {
-    text-align: center;
-  }
-
   #page-wrap .message {
     width: 70%;
     height: 112px;
