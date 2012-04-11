@@ -12,6 +12,11 @@ a:visited {
   color: #004ACC;
 }
 
+a:hover {
+  text-decoration: none;
+  color: #003DA8;
+}
+
 h1 {
   font-size: 4em;
   margin: 0px;
@@ -28,6 +33,21 @@ hr {
   padding: 0px 20px;
   margin: 40px auto;
 }
+
+  #page-wrap #navlist li:first-child {
+    display: inline;
+    list-style-type: none;
+  }
+
+  #page-wrap #navlist li {
+    display: inline;
+    padding-right: 20px;
+  }
+
+  #page-wrap nav {
+    text-align: center;
+  }
+
   #page-wrap .message {
     width: 70%;
     height: 112px;
