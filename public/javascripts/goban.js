@@ -1,4 +1,4 @@
-var socket = io.connect("http://hivego.info");
+var socket = io.connect("http://hivego.info:3001");
 
 // Socket.IO events
 socket.on("message", function(data){

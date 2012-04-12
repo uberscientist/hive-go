@@ -200,4 +200,4 @@ global.tweeted = false;
 
 setInterval(untilNext, 1000);
 
-app.listen(3002, '127.0.0.1');
+app.listen(3002);
