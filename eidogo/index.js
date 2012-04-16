@@ -2,6 +2,7 @@ require('./lang.js');
 require('./eidogo.js');
 require('./board.js');
 require('./rules.js');
+var sgf = require('sgf.js');
 
 // Setup Eidogo board
 exports.pass_in_a_row = pass_in_a_row = 0;
@@ -19,12 +20,14 @@ exports.playMove = function (coord, callback) {
   if (coord == 'pass') {
 
     exports.pass_in_a_row = pass_in_a_row += 1;
+    global.current_color = -global.current_color;
 
     //Check if both players have passed in row
     if(pass_in_a_row == 2){
       exports.pass_in_a_row = pass_in_a_row = 0;
       rules.board.reset();
       global.current_color = -1;
+      sgf.init();
     }
 
     resetCounters();
@@ -36,6 +39,7 @@ exports.playMove = function (coord, callback) {
     //reset game if resign
     rules.board.reset();
     global.current_color = -1;
+    sgf.init();
 
     resetCounters();
     callback(coord);
@@ -46,6 +50,7 @@ exports.playMove = function (coord, callback) {
     board.addStone(coord, global.current_color);
     rules.apply(coord, global.current_color);
 
+    global.current_color = -global.current_color;
     resetCounters();
     callback(coord);
   }

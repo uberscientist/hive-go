@@ -128,14 +128,6 @@ function updateBoard(){
         //clear votes
         db.del('go:votes', function(err){
           if(err) throw err;
-
-          //Reverse color, or let reset if end-game
-          if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign'){
-            global.current_color = global.current_color;
-          } else {
-            global.current_color = -global.current_color;
-          }
-
           sendBoardInfo();
 
           //update SGF file
