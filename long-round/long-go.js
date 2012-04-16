@@ -139,7 +139,7 @@ function updateBoard(){
           sendBoardInfo();
 
           //update SGF file
-          sgf.move(coord, 'long_game.sgf');
+          sgf.move(coord);
         });
       });
     } else {
