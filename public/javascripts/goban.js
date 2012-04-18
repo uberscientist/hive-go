@@ -1,10 +1,6 @@
-var socket = io.connect("http://hivego.info:3001");
+var socket = io.connect("http://localhost:3001");
 
 // Socket.IO events
-socket.on("message", function(data){
-  updateMessage(data.message);
-});
-
 socket.on("tick", function(data){
   updateTimer(data.until_next);
 });
@@ -41,10 +37,6 @@ function updateTimer(time){
   var min = pad(Math.floor(time/MIN) - hour * 60);
   var sec = pad(Math.floor(time/SEC) - (hour * 60 * 60) - (min * 60));
   $("div.timer").html(hour + ":" + min + ":" + sec);
-}
-
-function updateMessage(message){
-  $("div.voting").hide().html(message).fadeIn("slow");
 }
 
 //Map gameboard array to color

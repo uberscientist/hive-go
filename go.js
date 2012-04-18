@@ -38,7 +38,6 @@ Date.prototype.addSeconds = function(s){
   return this;
 }
 
-
 // Configuration
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -58,6 +57,19 @@ app.configure('production', function(){
 });
 
 // Functions
+function sanitize(text){
+  var i;
+  var clean_text = '';
+  var strip = '<>';
+  for(i = 0; i < text.length; i++){
+    var c = text.charAt(i);
+    if(strip.indexOf(c) == -1) clean_text += c;
+    if(strip.indexOf(c) == 0) clean_text += '&lt;';
+    if(strip.indexOf(c) == 1) clean_text += '&gt;';
+  }
+  return clean_text;
+}
+
 function sendBoardInfo(){
   io.sockets.emit('board', { color: global.current_color
                           , stones: go.rules.board.stones
@@ -151,7 +163,26 @@ io.sockets.on('connection', function(socket){
 
   //On connect send board info
   sendBoardInfo();
+
+  //Broadcast chat join
+  socket.broadcast.emit('join', { 'name': 'anon' });
  
+  //Chat event listeners
+  socket.on('disconnect', function() {
+    io.sockets.emit('leave', { 'id': socket.id,
+                             'name': socket.id }); //TODO:needs to be name
+  });
+  
+  socket.on('chat_message', function(data) {
+    if(data.text != '' && data.text.length <= 140 && data.name.length < 14){
+      var clean_data = { 'id': data.id,
+                          'name': sanitize(data.name),
+                          'text': sanitize(data.text)};
+      io.sockets.emit('chat_message', clean_data);
+    }
+  });
+
+  //Board event listeners
   socket.on('vote', function(data){
     go.checkMove(data.coord, function(check){
       if(check){
