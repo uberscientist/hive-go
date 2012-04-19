@@ -70,14 +70,6 @@ function sanitize(text){
   return clean_text;
 }
 
-function sendBoardInfo(){
-  io.sockets.emit('board', { color: global.current_color
-                          , stones: go.rules.board.stones
-                          ,   heat: go.rules.board.markers
-                          , passes: go.rules.board.passes
-                          ,resigns: go.rules.board.resigns });
-}
-
 function vote(coord, ip, callback){
 
   //Get UNIX time stamp for when all votes should expire
@@ -153,6 +145,34 @@ function updateBoard(){
   });
 }
 
+function sendBoardInfo(){
+  io.sockets.emit('board', { color: global.current_color
+                          , stones: go.rules.board.stones
+                          ,   heat: go.rules.board.markers
+                          , passes: go.rules.board.passes
+                          ,resigns: go.rules.board.resigns });
+}
+
+function getChatLog(callback){
+  var log = '';
+  db.lrange('go:chat_log', 0, -1, function(err, messages){
+    if(err) throw err;
+    for(var i = 0; i < messages.length; i++){
+      log += messages[messages.length-1 - i] + '<br/>';
+      if(i == messages.length -1)
+        callback(log);
+    }
+  });
+}
+
+function logChat(name, text){
+  db.multi()
+    .lpush('go:chat_log', name + ': ' + text)
+    .ltrim('go:chat_log', 0, 9)
+    .exec(function(err){
+      if(err) throw err;
+    });
+}
 
 // Routes
 app.get('/', routes.index);
@@ -161,23 +181,23 @@ app.get('/', routes.index);
 io.sockets.on('connection', function(socket){
   var ip = socket.handshake.address.address;
 
-  //On connect send board info
+  //On connect send board info & chat log
   sendBoardInfo();
-
-  //Broadcast chat join
-  socket.broadcast.emit('join', { 'name': 'anon' });
- 
-  //Chat event listeners
-  socket.on('disconnect', function() {
-    io.sockets.emit('leave', { 'id': socket.id,
-                             'name': socket.id }); //TODO:needs to be name
+  getChatLog(function(chat_log){
+    socket.emit('chat_log', {'log': chat_log});
   });
-  
+
   socket.on('chat_message', function(data) {
-    if(data.text != '' && data.text.length <= 140 && data.name.length < 14){
+    if(data.text != '' && data.text.length <= 140 && data.name.length <= 13){
+      var name = sanitize(data.name);
+      var text = sanitize(data.text);
+
+      logChat(name, text);
+
       var clean_data = { 'id': data.id,
-                          'name': sanitize(data.name),
-                          'text': sanitize(data.text)};
+                          'name': name,
+                          'text': text };
+
       io.sockets.emit('chat_message', clean_data);
     }
   });

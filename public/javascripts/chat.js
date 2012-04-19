@@ -1,5 +1,3 @@
-var socket = io.connect('http://hivego.info:3001');
-
 String.prototype.parseURL = function() {
 	return this.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g, function(url) {
 		return url.link(url);
@@ -26,14 +24,8 @@ function display_msg(name,msg) {
 }
 
 //Socket.io event listeners
-socket.on('join', function(data) {
-  $('#chatbox').append('<i>'+data.name+' joined</i><br/>');
-  $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
-});
-
-socket.on('leave', function(data){
-  $('#chatbox').append('<i>'+data.name+' left</i><br/>');
-  $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+socket.on('chat_log', function(chat){
+  $('#chatbox').append(chat.log);
 });
 
 socket.on('chat_message', function(data) {
