@@ -235,9 +235,6 @@ function drawStones(data){
   stoneOverlay.add(pass_text);
   stoneOverlay.add(resign_text);
 
-  //Add pass/resign votes to stoneOverlay
-//  drawInfo(data);
-  
   //Draw board, then add stones/votes after everything else is done
   drawBoardBg(function(){
     stage.add(heatOverlay);
@@ -246,23 +243,29 @@ function drawStones(data){
 }
 
 function drawBoardBg(callback){
-  window.stage = window.stage || new Kinetic.Stage("goban", 500, 550);
-  var gobanLayer = gobanLayer || new Kinetic.Layer();
-  var background = background || new Kinetic.Layer();
-
-  var gobanGridObj = new Image();
+  //Doing this to try and fix the memory leaks
+  if(typeof(gobanLayer) == 'undefined'){
+    stage = new Kinetic.Stage("goban", 500, 550);
+    gobanLayer = new Kinetic.Layer();
+    background = new Kinetic.Layer();
+    gobanGridObj = new Image();
+  } else {
+    stage.children = [];
+  }
   
   //Draw the backround
   gobanGridObj.onload = function(){
 
-    var gobanGrid = gobanGrid || new Kinetic.Image({ image: gobanGridObj,
-                                                          x: 50,
-                                                          y: 50 });
+    if(typeof(gobanGrid) == 'undefined'){
+      gobanGrid = new Kinetic.Image({ image: gobanGridObj,
+                                          x: 50,
+                                          y: 50 });
 
-    var gobanBack = gobanBack || new Kinetic.Rect({ width: 500,
-                                                    height: 550,
-                                                      fill: "#E09110" });
-
+      gobanBack = new Kinetic.Rect({ width: 500,
+                                    height: 550,
+                                      fill: "#E09110" });
+    }
+    
     gobanLayer.add(gobanBack);
     gobanLayer.add(gobanGrid);
 
