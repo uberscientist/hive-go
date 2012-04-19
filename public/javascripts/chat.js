@@ -21,6 +21,11 @@ function sanitize(text){
 function display_msg(name,msg) { 
   $('#chatbox').append('<b>'+name +'</b>: '+msg.parseURL()+'<br/>');
   $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+  if(msg == $('#text_entry').attr('value')){
+    //clear text, and refocus
+    $('#text_entry').attr('value',''); 
+    $('#text_entry').focus();
+  }
 }
 
 //Socket.io event listeners
@@ -49,11 +54,6 @@ $(document).ready(function(){
         socket.emit('chat_message', { 'name': chat_name,
                                       'text': chat_send });
       }
-
-      //clear text, and refocus
-      $('#text_entry').attr('value',''); 
-      $('#text_entry').focus();
     };
-
   });
 });
