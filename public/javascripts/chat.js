@@ -19,9 +19,10 @@ function sanitize(text){
 
 //function to display new messages
 function display_msg(name,msg) { 
+  var text = sanitize($('#text_entry').attr('value'));
   $('#chatbox').append('<b>'+name +'</b>: '+msg.parseURL()+'<br/>');
   $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
-  if(msg == $('#text_entry').attr('value')){
+  if(msg == text){
     //clear text, and refocus
     $('#text_entry').attr('value',''); 
     $('#text_entry').focus();
