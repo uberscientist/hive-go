@@ -1,4 +1,4 @@
-var socket = io.connect("http://hivego.info:3001");
+var socket = io.connect("http://localhost:3001");
 
 // Socket.IO events
 socket.on("tick", function(data){
@@ -23,6 +23,7 @@ function pad(num){
   }
   return str;
 }
+
 function updateTimer(time){
   var SEC = 1000,           //Timer variables 
       MIN = SEC * 60,
@@ -39,71 +40,66 @@ function updateTimer(time){
   $("div.timer").html(hour + ":" + min + ":" + sec);
 }
 
+
+
 //Map gameboard array to color
-function getStoneColor(i, stones, heat){
+function getStoneColor(i, stone, vote){
 
-  //Setup gradients for stones
-  var context = stoneOverlay.getContext();
-  var white_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
-  white_grd.addColorStop(0, "#bbbbbb");
-  white_grd.addColorStop(1, "#ffffff");
+  switch(stone){
 
-  var black_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
-  black_grd.addColorStop(0, "#000000");
-  black_grd.addColorStop(1, "#858585");
-
-  switch(stones[Math.abs(i - 80)]){
     case 0:
-      if(heat[80-i] == 0)
+      if(vote == 0)
         return "transparent";
       else
         return "#8F0000";             // Return red for positions with votes
+
     case -1:
+      var context = stoneOverlay.getContext();
+      var black_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
+      black_grd.addColorStop(0, "#000000");
+      black_grd.addColorStop(1, "#858585");
       return black_grd;
+
     case 1:
+      var context = stoneOverlay.getContext();
+      var white_grd = context.createRadialGradient(-9, -5, 28, -11, -12, 1);
+      white_grd.addColorStop(0, "#bbbbbb");
+      white_grd.addColorStop(1, "#ffffff");
       return white_grd;
   }
 };
 
-function drawInfo(data){
-  var passes = data.passes;
-  var resigns = data.resigns;
-
-  var pass_count = new Kinetic.Text({
-    x: 150,
-    y: 500,
-    text: "",
-    fontSize: 20,
-    fontFamily: "Chelsea Market",
-    textFill: "black",
-    fill: "#A36400",
-    stroke: "#7A4B00",
-    strokeWidth: 3,
-    padding: 15,
-    align: "center",
-    verticalAlign: "middle"
-  });
-}
-
 function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
-  var heatOverlay = new Kinetic.Layer();
-  window.stoneOverlay = new Kinetic.Layer();
+
+  if(typeof(stoneOverlay) == 'undefined'){
+    window.stoneOverlay = new Kinetic.Layer();
+    window.heatOverlay = new Kinetic.Layer();
+  } else {
+    stoneOverlay.removeChildren();
+    stoneOverlay.draw();
+    heatOverlay.removeChildren();
+    heatOverlay.draw();
+  }
+
   var pos_x = 0, pos_y = 500;
+
 
   for(var i = 80; i >= 0; i--){
     (function(){
       pos_x++
+      var vote = heat[80-i];
+      var stone = stones[Math.abs(i-80)];
 
       var circle = new Kinetic.Circle({
         x: pos_x * 50,
         y: pos_y - 50,
         radius: 25,
         name: i,
-        heat: heat[80-i],
-        fill: getStoneColor(i, stones, heat),
-        alpha: (heat[80-i] != 0) ? .2 : 1,
+        heat: vote,
+        fill: getStoneColor(i, stone, vote),
+        alpha: (vote != 0) ? .2 : 1,
         point: { x: pos_x - 1, y: Math.abs((pos_y - 500)) / 50 },
       });
 
@@ -139,7 +135,7 @@ function drawStones(data){
       }
 
       circle.on("mouseover", function(){
-        var circ_fill = getStoneColor(circle.name, stones, heat);
+        var circ_fill = getStoneColor(circle.name, stone, vote);
 
         if(circ_fill != "#8F0000" && circ_fill != "transparent"){
           return;
@@ -150,7 +146,7 @@ function drawStones(data){
       })
 
       circle.on("mouseout", function(){
-        this.setFill(getStoneColor(this.name, stones, heat));
+        this.setFill(getStoneColor(this.name, stone, vote));
         heatOverlay.draw();
         if(this.fill != "#8F0000"){
           this.setAlpha(1);
@@ -169,89 +165,90 @@ function drawStones(data){
   /**
   * Create "pass" and "resign" buttons
   */
+  (function(){
+    var pass_text = new Kinetic.Text({
+      x: 150,
+      y: 500,
+      text: "Pass " + data.passes,
+      fontSize: 20,
+      fontFamily: "Chelsea Market",
+      textFill: "black",
+      fill: "#F6AA31",
+      stroke: "black",
+      strokeWidth: 2,
+      padding: 15,
+      align: "center",
+      verticalAlign: "middle"
+    });
+  
+    var resign_text = new Kinetic.Text({
+      x: 350,
+      y: 500,
+      text: "Resign " + data.resigns,
+      fontSize: 20,
+      fontFamily: "Chelsea Market",
+      textFill: "black",
+      fill: "#F6AA31",
+      stroke: "black",
+      strokeWidth: 2,
+      padding: 15,
+      align: "center",
+      verticalAlign: "middle"
+    });
 
-  var pass_text = new Kinetic.Text({
-    x: 150,
-    y: 500,
-    text: "Pass " + data.passes,
-    fontSize: 20,
-    fontFamily: "Chelsea Market",
-    textFill: "black",
-    fill: "#F6AA31",
-    stroke: "black",
-    strokeWidth: 2,
-    padding: 15,
-    align: "center",
-    verticalAlign: "middle"
-  });
- 
-  var resign_text = new Kinetic.Text({
-    x: 350,
-    y: 500,
-    text: "Resign " + data.resigns,
-    fontSize: 20,
-    fontFamily: "Chelsea Market",
-    textFill: "black",
-    fill: "#F6AA31",
-    stroke: "black",
-    strokeWidth: 2,
-    padding: 15,
-    align: "center",
-    verticalAlign: "middle"
-  });
+    //Functions to deal with mouse events
+    function button_over(button){
+      button.setFill("#DB8700");
+      stoneOverlay.draw();
+    }
 
-  //Functions to deal with mouse events
-  function button_over(button){
-    button.setFill("#DB8700");
-    stoneOverlay.draw();
-  }
+    function button_out(button){
+      button.setFill("#F6AA31");
+      stoneOverlay.draw();
+    }
 
-  function button_out(button){
-    button.setFill("#F6AA31");
-    stoneOverlay.draw();
-  }
+    //event listeners
+    pass_text.on("mouseover", function(){
+      button_over(this);
+    });
+    pass_text.on("mouseout", function(){
+      button_out(this);
+    });
+    pass_text.on("click", function(){
+      socket.emit("vote", { coord: "pass" } );
+    });
 
-  //event listeners
-  pass_text.on("mouseover", function(){
-    button_over(this);
-  });
-  pass_text.on("mouseout", function(){
-    button_out(this);
-  });
-  pass_text.on("click", function(){
-    socket.emit("vote", { coord: "pass" } );
-  });
+    resign_text.on("mouseover", function(){
+      button_over(this);
+    });
+    resign_text.on("mouseout", function(){
+      button_out(this);
+    });
+    resign_text.on("click", function(){
+      socket.emit("vote", { coord: "resign" } );
+    });
 
-  resign_text.on("mouseover", function(){
-    button_over(this);
-  });
-  resign_text.on("mouseout", function(){
-    button_out(this);
-  });
-  resign_text.on("click", function(){
-    socket.emit("vote", { coord: "resign" } );
-  });
-
-  stoneOverlay.add(pass_text);
-  stoneOverlay.add(resign_text);
+    stoneOverlay.add(pass_text);
+    stoneOverlay.add(resign_text);
+  }());
 
   //Draw board, then add stones/votes after everything else is done
-  drawBoardBg(function(){
+  if(typeof(stage) == 'undefined'){
+    drawBoardBg(function(){
+      stage.add(heatOverlay);
+      stage.add(stoneOverlay);
+    });
+  } else {
     stage.add(heatOverlay);
     stage.add(stoneOverlay);
-  });
+  }
 }
 
 function drawBoardBg(callback){
-  //Doing this to try and fix the memory leaks
-  if(typeof(gobanLayer) == 'undefined'){
-    stage = new Kinetic.Stage("goban", 500, 550);
-    gobanLayer = new Kinetic.Layer();
-    background = new Kinetic.Layer();
-    gobanGridObj = new Image();
-  } else {
-    stage.children = [];
-  }
+  stage = new Kinetic.Stage("goban", 500, 550);
+  gobanLayer = new Kinetic.Layer();
+  background = new Kinetic.Layer();
+  gobanGridObj = new Image();
   
   //Draw the backround
   gobanGridObj.onload = function(){

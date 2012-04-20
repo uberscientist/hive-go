@@ -31,7 +31,8 @@ function display_msg(name,msg) {
 
 //Socket.io event listeners
 socket.on('chat_log', function(chat){
-  $('#chatbox').append(chat.log);
+  $('#chatbox').append(chat.log.parseURL());
+  $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
 });
 
 socket.on('chat_message', function(data) {
