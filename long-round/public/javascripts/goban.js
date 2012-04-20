@@ -1,4 +1,4 @@
-var socket = io.connect("http://hivego.info:3001");
+var socket = io.connect("http://hivego.info:3002");
 
 // Socket.IO events
 socket.on("tick", function(data){
@@ -17,9 +17,9 @@ socket.on("board", function(data){
 
 // Functions
 function pad(num){
-  var str = '' + num;
+  var str = "" + num;
   while (str.length < 2){
-    str = '0' + str;
+    str = "0" + str;
   }
   return str;
 }
@@ -73,7 +73,7 @@ function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
 
-  if(typeof(stoneOverlay) == 'undefined'){
+  if(typeof(stoneOverlay) == "undefined"){
     window.stoneOverlay = new Kinetic.Layer();
     window.heatOverlay = new Kinetic.Layer();
   } else {
@@ -242,7 +242,7 @@ function drawStones(data){
   }());
 
   //Draw board, then add stones/votes after everything else is done
-  if(typeof(stage) == 'undefined'){
+  if(typeof(stage) == "undefined"){
     drawBoardBg(function(){
       stage.add(heatOverlay);
       stage.add(stoneOverlay);
@@ -262,7 +262,7 @@ function drawBoardBg(callback){
   //Draw the backround
   gobanGridObj.onload = function(){
 
-    if(typeof(gobanGrid) == 'undefined'){
+    if(typeof(gobanGrid) == "undefined"){
       gobanGrid = new Kinetic.Image({ image: gobanGridObj,
                                           x: 50,
                                           y: 50 });

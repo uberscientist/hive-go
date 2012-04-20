@@ -17,9 +17,9 @@ socket.on("board", function(data){
 
 // Functions
 function pad(num){
-  var str = '' + num;
+  var str = "" + num;
   while (str.length < 2){
-    str = '0' + str;
+    str = "0" + str;
   }
   return str;
 }
@@ -73,7 +73,7 @@ function drawStones(data){
   var stones = data.stones;
   var heat = data.heat;
 
-  if(typeof(stoneOverlay) == 'undefined'){
+  if(typeof(stoneOverlay) == "undefined"){
     window.stoneOverlay = new Kinetic.Layer();
     window.heatOverlay = new Kinetic.Layer();
   } else {
@@ -104,29 +104,30 @@ function drawStones(data){
       });
 
       if(circle.heat != 0){
-        var vote_display = new Kinetic.Text({    //Vote counter text object
+        circle.vote_display = new Kinetic.Text({    //Vote counter text object
           text:"",
           fontFamily: "Chelsea Market",
           fontSize: 28,
           textFill: "black", 
           textStroke: "white", 
+          visible: false
         });
 
         //Adjust vote size based on #
         if(circle.heat == 1)
-          vote_display.setPosition(circle.x - 5, circle.y - 14);
+          circle.vote_display.setPosition(circle.x - 5, circle.y - 14);
         else if(circle.heat > 1 && circle.heat < 10)
-          vote_display.setPosition(circle.x - 10, circle.y - 14);
+          circle.vote_display.setPosition(circle.x - 10, circle.y - 14);
         else if(circle.heat > 9 && circle.heat < 20){ //Double digits
-          vote_display.setFontSize(25);
-          vote_display.setPosition(circle.x - 13, circle.y - 14);
+          circle.vote_display.setFontSize(25);
+          circle.vote_display.setPosition(circle.x - 13, circle.y - 14);
         } else {
-          vote_display.setFontSize(25);
-          vote_display.setPosition(circle.x - 19, circle.y - 14);
+          circle.vote_display.setFontSize(25);
+          circle.vote_display.setPosition(circle.x - 19, circle.y - 14);
         }
 
-        vote_display.setText(circle.heat);
-        heatOverlay.add(vote_display);
+        circle.vote_display.setText(circle.heat);
+        heatOverlay.add(circle.vote_display);
       }
 
       if(i !== 0 && i%9 == 0){  // If end of row
@@ -141,17 +142,25 @@ function drawStones(data){
           return;
         }
         this.setFill(current_color);
-        this.setAlpha(.3);
+        this.setAlpha(.2);
+
+        if(typeof(this.vote_display) !== "undefined"){
+          this.vote_display.show();
+          heatOverlay.draw();
+        }
         stoneOverlay.draw();
       })
 
       circle.on("mouseout", function(){
         this.setFill(getStoneColor(this.name, stone, vote));
-        heatOverlay.draw();
         if(this.fill != "#8F0000"){
           this.setAlpha(1);
+        } else {
+          this.vote_display.hide();
+          this.setAlpha(.2);
         }
         stoneOverlay.draw();
+        heatOverlay.draw();
       })
 
       circle.on("click", function(){
@@ -233,7 +242,7 @@ function drawStones(data){
   }());
 
   //Draw board, then add stones/votes after everything else is done
-  if(typeof(stage) == 'undefined'){
+  if(typeof(stage) == "undefined"){
     drawBoardBg(function(){
       stage.add(heatOverlay);
       stage.add(stoneOverlay);
@@ -253,7 +262,7 @@ function drawBoardBg(callback){
   //Draw the backround
   gobanGridObj.onload = function(){
 
-    if(typeof(gobanGrid) == 'undefined'){
+    if(typeof(gobanGrid) == "undefined"){
       gobanGrid = new Kinetic.Image({ image: gobanGridObj,
                                           x: 50,
                                           y: 50 });
