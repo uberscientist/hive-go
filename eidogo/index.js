@@ -49,6 +49,7 @@ exports.playMove = function (coord, callback) {
     //Add stone  
     board.addStone(coord, global.current_color);
     rules.apply(coord, global.current_color);
+    board.commit();
 
     global.current_color = -global.current_color;
     resetCounters();
@@ -93,10 +94,48 @@ exports.voteStone = function (old_coord, coord, callback){
 
 exports.checkMove = function (coord, callback) {
   if (rules.board.stones[coord.y * 9 + coord.x] == 0){
-    callback(true);
+
+    //If there is no stone at coordinate, check if there is a ko rule
+    koCheck(coord, function(ko){
+      if(ko == true){
+
+        //if the coordinate is a ko point, then it's an illegal move (false)
+        callback(false);
+      } else {
+
+        //or it's legal (true)
+        callback(true);
+      }
+    });
+
+    //Check if pass/resign command
   } else if (coord == 'pass' || coord == 'resign'){
     callback(true);
   } else {
+
+    //everything else is a false move including garbage data
     callback(false);
   }
+}
+
+function koCheck(coord, callback){
+
+  if(typeof(board.cache[board.cache.length-2]) == 'undefined'){
+    callback(false);
+    return;
+  }
+
+  var stones = board.stones;
+
+  board.addStone(coord, global.current_color);
+  rules.apply(coord, global.current_color);
+
+  if(stones.join('') == board.cache[board.cache.length-2].stones.join('')){
+    console.log('true');
+    callback(true);
+  } else {
+    console.log('false');
+    callback(false);
+  }
+  board.rollback();
 }
