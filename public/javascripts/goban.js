@@ -230,7 +230,6 @@ function drawStones(data){
     //event listeners
     pass_text.on("mouseover", function(){
       button_over(this);
-      $
     });
     pass_text.on("mouseout", function(){
       button_out(this);
@@ -280,7 +279,7 @@ function drawBoardBg(callback){
                                           y: 50 });
 
       gobanBack = new Kinetic.Rect({ width: 500,
-                                    height: 580,
+                                    height: 570,
                                       fill: "#E09110" });
     }
     
