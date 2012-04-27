@@ -190,7 +190,7 @@ function drawStones(data){
   (function(){
     var pass_text = new Kinetic.Text({
       x: 320,
-      y: 495,
+      y: 500,
       text: data.passes,
       fontSize: 20,
       fontFamily: "Chelsea Market",
@@ -203,7 +203,7 @@ function drawStones(data){
   
     var resign_text = new Kinetic.Text({
       x: 380,
-      y: 495,
+      y: 500,
       text: data.resigns,
       fontSize: 20,
       fontFamily: "Chelsea Market",
