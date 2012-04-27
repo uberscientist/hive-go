@@ -25,11 +25,12 @@ This returns a JSON object that is structured like so:
 
 
 Colors are represented by +/- 1. -1 is black, 1 is white and zero (0) represents an empty intersection.
-- `color` is the current color
-- `passes` and `resigns` are the number of votes for those choices
-- `stones` is an array of what stones of what color are commited to the game
-- `markers` are the votes for each coordinate
-- `caps` is an object containing the amount of points in captures for white and black.
+  - `color` is the current color
+  - `passes` and `resigns` are the number of votes for those choices
+  - `stones` is an array of what stones of what color are commited to the game
+  - `markers` are the votes for each coordinate
+  - `caps` is an object containing the amount of points in captures for white and black.
+
 
 - **/time**
 
