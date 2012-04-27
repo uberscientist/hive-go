@@ -122,7 +122,6 @@ function updateBoard(){
   db.zrevrange('go:votes', 0, 0, function(err, data){
     if(err) throw err;
 
-    //In case of no votes reset clock
     if(data.length > 0){
       coord = JSON.parse(data);
 
@@ -139,6 +138,8 @@ function updateBoard(){
         });
       });
     } else {
+
+    //In case of no votes reset clock
       next_round = new Date().addMinutes(round_time);
       return;
     }
@@ -150,7 +151,8 @@ function sendBoardInfo(){
                           , stones: go.rules.board.stones
                           ,   heat: go.rules.board.markers
                           , passes: go.rules.board.passes
-                          ,resigns: go.rules.board.resigns });
+                          ,resigns: go.rules.board.resigns
+                          , caps: go.rules.board.captures });
 }
 
 function getChatLog(callback){

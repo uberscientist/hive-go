@@ -13,6 +13,7 @@ socket.on("board", function(data){
   $("#current-color").html(current_color);
 
   drawStones(data);
+  drawCaptures(data.caps);
 });
 
 // Functions
@@ -40,7 +41,19 @@ function updateTimer(time){
   $("div.timer").html(hour + ":" + min + ":" + sec);
 }
 
+function drawCaptures(caps){
+  var captures_text = new Kinetic.Text({
+    x: 75,
+    y: 520,
+    text: caps.B + " / " + caps.W,
+    fontSize: 20,
+    fontFamily: "Chelsea Market",
+    textFill: "black",
+  });
 
+  heatOverlay.add(captures_text);
+  heatOverlay.draw();
+}
 
 //Map gameboard array to color
 function getStoneColor(i, stone, vote){
@@ -176,9 +189,9 @@ function drawStones(data){
   */
   (function(){
     var pass_text = new Kinetic.Text({
-      x: 150,
-      y: 500,
-      text: "Pass " + data.passes,
+      x: 320,
+      y: 495,
+      text: data.passes,
       fontSize: 20,
       fontFamily: "Chelsea Market",
       textFill: "black",
@@ -186,24 +199,22 @@ function drawStones(data){
       stroke: "black",
       strokeWidth: 2,
       padding: 15,
-      align: "center",
-      verticalAlign: "middle"
     });
   
     var resign_text = new Kinetic.Text({
-      x: 350,
-      y: 500,
-      text: "Resign " + data.resigns,
+      x: 380,
+      y: 495,
+      text: data.resigns,
       fontSize: 20,
       fontFamily: "Chelsea Market",
       textFill: "black",
       fill: "#F6AA31",
       stroke: "black",
+      align: "left",
       strokeWidth: 2,
       padding: 15,
-      align: "center",
-      verticalAlign: "middle"
     });
+
 
     //Functions to deal with mouse events
     function button_over(button){
@@ -219,6 +230,7 @@ function drawStones(data){
     //event listeners
     pass_text.on("mouseover", function(){
       button_over(this);
+      $
     });
     pass_text.on("mouseout", function(){
       button_out(this);
@@ -254,7 +266,7 @@ function drawStones(data){
 }
 
 function drawBoardBg(callback){
-  stage = new Kinetic.Stage("goban", 500, 550);
+  stage = new Kinetic.Stage("goban", 500, 570);
   gobanLayer = new Kinetic.Layer();
   background = new Kinetic.Layer();
   gobanGridObj = new Image();
@@ -268,7 +280,7 @@ function drawBoardBg(callback){
                                           y: 50 });
 
       gobanBack = new Kinetic.Rect({ width: 500,
-                                    height: 550,
+                                    height: 580,
                                       fill: "#E09110" });
     }
     
@@ -303,6 +315,48 @@ function drawBoardBg(callback){
       });
       gobanLayer.add(number);
     }
+
+    //add pass/resign titles and capture titles
+    var button_titles = new Kinetic.Text({
+      x: 320,
+      y: 480,
+      text: "pass / resign",
+      fontSize: 12,
+      fontFamily: "Chelsea Market",
+      textFill: "black"
+    });
+
+    var captures = new Kinetic.Text({
+      x: 68,
+      y: 480,
+      text: "captures",
+      fontSize: 12,
+      fontFamily: "Chelsea Market",
+      textFill: "black"
+    });
+
+    var capture_titles = new Kinetic.Text({
+      x: 50,
+      y: 500,
+      text: "black / white",
+      fontSize: 12,
+      fontFamily: "Chelsea Market",
+      textFill: "black"
+    });
+
+    var komi = new Kinetic.Text({
+      x: 200,
+      y: 480,
+      text: "komi: 5.5",
+      fontSize: 12,
+      fontFamily: "Chelsea Market",
+      textFill: "black",
+    });
+
+    gobanLayer.add(komi);
+    gobanLayer.add(captures);
+    gobanLayer.add(capture_titles);
+    gobanLayer.add(button_titles);
 
     stage.add(gobanLayer);
     callback();

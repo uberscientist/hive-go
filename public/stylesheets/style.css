@@ -45,7 +45,6 @@ hr {
 
   #page-wrap .message {
     width: 70%;
-    height: 112px;
     border-style: none none solid;
     border-width: 2px;
     text-align: center;
@@ -64,7 +63,7 @@ hr {
 
   #page-wrap #goban {
     width: 500px;
-    height: 550px;
+    height: 570px;
     margin: 10px auto;
   }
 

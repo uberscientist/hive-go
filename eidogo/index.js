@@ -131,10 +131,8 @@ function koCheck(coord, callback){
   rules.apply(coord, global.current_color);
 
   if(stones.join('') == board.cache[board.cache.length-2].stones.join('')){
-    console.log('true');
     callback(true);
   } else {
-    console.log('false');
     callback(false);
   }
   board.rollback();
