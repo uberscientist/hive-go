@@ -18,7 +18,7 @@ var express = require('express')
 io.set('log level', 1);
 
 // Set round time in hours
-var round_time = 6;
+var round_time = 24;
 
 // Extending date prototype
 Date.prototype.addHours = function(h){
@@ -37,7 +37,6 @@ Date.prototype.addSeconds = function(s){
   this.setSeconds(this.getSeconds() + s);
   return this;
 }
-
 
 // Configuration
 app.configure(function(){
@@ -58,12 +57,17 @@ app.configure('production', function(){
 });
 
 // Functions
-function sendBoardInfo(){
-  io.sockets.emit('board', { color: global.current_color
-                          , stones: go.rules.board.stones
-                          ,   heat: go.rules.board.markers
-                          , passes: go.rules.board.passes
-                          ,resigns: go.rules.board.resigns });
+function sanitize(text){
+  var i;
+  var clean_text = '';
+  var strip = '<>';
+  for(i = 0; i < text.length; i++){
+    var c = text.charAt(i);
+    if(strip.indexOf(c) == -1) clean_text += c;
+    if(strip.indexOf(c) == 0) clean_text += '&lt;';
+    if(strip.indexOf(c) == 1) clean_text += '&gt;';
+  }
+  return clean_text;
 }
 
 function vote(coord, ip, callback){
@@ -118,37 +122,71 @@ function updateBoard(){
   db.zrevrange('go2:votes', 0, 0, function(err, data){
     if(err) throw err;
 
-    //In case of no votes reset clock
     if(data.length > 0){
       coord = JSON.parse(data);
 
       //Update eidogo board
       go.playMove(coord, function(coord){
 
-        //clear votes
-        db.del('go2:votes', function(err){
-          if(err) throw err;
+      var info_obj = { color: global.current_color
+                    , stones: go.rules.board.stones
+                    ,   heat: go.rules.board.markers
+                    , passes: go.rules.board.passes
+                    ,resigns: go.rules.board.resigns
+                      , caps: go.rules.board.captures };
 
-          //Reverse color, or let reset if end-game
-          if((coord == 'pass' && go.pass_in_a_row == 2) || coord == 'resign'){
-            global.current_color = global.current_color;
-          } else {
-            global.current_color = -global.current_color;
-          }
+        //clear votes and update redis board
+        db.multi()
+          .set('go2:info', JSON.stringify(info_obj))
+          .del('go2:votes')
+          .exec(function(err){
+            if(err) throw err;
+            sendBoardInfo();
 
-          sendBoardInfo();
-
-          //update SGF file
-          sgf.move(coord);
+            //update SGF file
+            sgf.move(coord);
         });
       });
     } else {
+
+    //In case of no votes reset clock
       next_round = new Date().addHours(round_time);
       return;
     }
   });
 }
 
+function sendBoardInfo(){
+  var info_obj = { color: global.current_color
+                , stones: go.rules.board.stones
+                ,   heat: go.rules.board.markers
+                , passes: go.rules.board.passes
+                ,resigns: go.rules.board.resigns
+                  , caps: go.rules.board.captures };
+
+  io.sockets.emit('board', info_obj);
+}
+
+function getChatLog(callback){
+  var log = '';
+  db.lrange('go2:chat_log', 0, -1, function(err, messages){
+    if(err) throw err;
+    for(var i = 0; i < messages.length; i++){
+      log += messages[messages.length-1 - i] + '<br/>';
+      if(i == messages.length -1)
+        callback(log);
+    }
+  });
+}
+
+function logChat(name, text){
+  db.multi()
+    .lpush('go2:chat_log', name + ': ' + text)
+    .ltrim('go2:chat_log', 0, 9)
+    .exec(function(err){
+      if(err) throw err;
+    });
+}
 
 // Routes
 app.get('/', routes.index);
@@ -157,9 +195,28 @@ app.get('/', routes.index);
 io.sockets.on('connection', function(socket){
   var ip = socket.handshake.address.address;
 
-  //On connect send board info
+  //On connect send board info & chat log
   sendBoardInfo();
- 
+  getChatLog(function(chat_log){
+    socket.emit('chat_log', {'log': chat_log});
+  });
+
+  socket.on('chat_message', function(data) {
+    if(data.text != '' && data.text.length <= 140 && data.name.length <= 13){
+      var name = sanitize(data.name);
+      var text = sanitize(data.text);
+
+      logChat(name, text);
+
+      var clean_data = { 'id': data.id,
+                          'name': name,
+                          'text': text };
+
+      io.sockets.emit('chat_message', clean_data);
+    }
+  });
+
+  //Board event listeners
   socket.on('vote', function(data){
     go.checkMove(data.coord, function(check){
       if(check){

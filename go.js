@@ -128,13 +128,23 @@ function updateBoard(){
       //Update eidogo board
       go.playMove(coord, function(coord){
 
-        //clear votes
-        db.del('go:votes', function(err){
-          if(err) throw err;
-          sendBoardInfo();
+      var info_obj = { color: global.current_color
+                    , stones: go.rules.board.stones
+                    ,   heat: go.rules.board.markers
+                    , passes: go.rules.board.passes
+                    ,resigns: go.rules.board.resigns
+                      , caps: go.rules.board.captures };
 
-          //update SGF file
-          sgf.move(coord);
+        //clear votes and update redis board
+        db.multi()
+          .set('go:info', JSON.stringify(info_obj))
+          .del('go:votes')
+          .exec(function(err){
+            if(err) throw err;
+            sendBoardInfo();
+
+            //update SGF file
+            sgf.move(coord);
         });
       });
     } else {
@@ -147,12 +157,14 @@ function updateBoard(){
 }
 
 function sendBoardInfo(){
-  io.sockets.emit('board', { color: global.current_color
-                          , stones: go.rules.board.stones
-                          ,   heat: go.rules.board.markers
-                          , passes: go.rules.board.passes
-                          ,resigns: go.rules.board.resigns
-                          , caps: go.rules.board.captures });
+  var info_obj = { color: global.current_color
+                , stones: go.rules.board.stones
+                ,   heat: go.rules.board.markers
+                , passes: go.rules.board.passes
+                ,resigns: go.rules.board.resigns
+                  , caps: go.rules.board.captures };
+
+  io.sockets.emit('board', info_obj);
 }
 
 function getChatLog(callback){

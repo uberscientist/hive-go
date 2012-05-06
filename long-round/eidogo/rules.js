@@ -8,8 +8,9 @@
 /**
  * @class Applies rules (capturing, ko, etc) to a board.
  */
-eidogo.Rules = function(board) {
+eidogo.Rules = function(board, callback) {
     this.init(board);
+    callback();
 };
 eidogo.Rules.prototype = {
     /**
@@ -26,7 +27,6 @@ eidogo.Rules.prototype = {
     check: function(pt, color) {
         // already occupied?
         if (this.board.getStone(pt) != this.board.EMPTY) {
-            console.log('can\'t place stone, point occupied');
             return false;
         }
         // TODO: check for suicide? (allowed in certain rulesets)    

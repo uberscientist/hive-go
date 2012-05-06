@@ -1,3 +1,4 @@
+var db = require('../node_modules/db.js');
 require('./lang.js');
 require('./eidogo.js');
 require('./board.js');
@@ -7,7 +8,23 @@ var sgf = require('sgf.js');
 // Setup Eidogo board
 exports.pass_in_a_row = pass_in_a_row = 0;
 var board = new eidogo.Board;
-var rules = exports.rules = new eidogo.Rules(board);
+var rules = exports.rules = new eidogo.Rules(board, function(){
+
+  //Get board info from redis
+  db.get('go:info', function(err, info){
+    if(err) throw err;
+    console.log(rules.board);
+    if(info != 0){
+      var info = JSON.parse(info);
+      global.current_color = info.color;
+      rules.board.stones = info.stones;
+      rules.board.markers = info.heat;
+      rules.board.passes = info.passes;
+      rules.board.resigns = info.resigns; 
+    }
+    console.log(rules.board);
+  });
+});
 
 function resetCounters(){
     //Reset vote array + pass/resigns
