@@ -1,14 +1,11 @@
 HiveGo REST API
-===========
+============
 
 http://api.hivego.info/ is the base URL for the API.
 
 
-GET
--------
-- **/boardstate**
-
-
+# GET
+## **/boardstate**
 This returns a JSON object that is structured like so:
 
 
@@ -31,9 +28,7 @@ Colors are represented by +/- 1. -1 is black, 1 is white and zero (0) represents
 - `markers` are the votes for each coordinate
 - `caps` is an object containing the amount of points in captures for white and black.
 
-- **/time**
-
-
+## **/time**
 This returns a JSON object containing the UNIX time stamp of when the round ends:
 
 
@@ -43,9 +38,8 @@ This returns a JSON object containing the UNIX time stamp of when the round ends
     }
 ```
 
-POST
-------
-- **/vote**
+#POST
+## **/vote**
 
 
 Accepts a JSON string formatted like so: `vote={ x: 4, y: 4 }`. 
