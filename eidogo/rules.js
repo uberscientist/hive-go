@@ -8,8 +8,9 @@
 /**
  * @class Applies rules (capturing, ko, etc) to a board.
  */
-eidogo.Rules = function(board) {
+eidogo.Rules = function(board, callback) {
     this.init(board);
+    callback();
 };
 eidogo.Rules.prototype = {
     /**

@@ -13,16 +13,27 @@ var rules = exports.rules = new eidogo.Rules(board, function(){
   //Get board info from redis
   db.get('go:info', function(err, info){
     if(err) throw err;
-    console.log(rules.board);
-    if(info != 0){
+
+    if(info != null){
       var info = JSON.parse(info);
       global.current_color = info.color;
       rules.board.stones = info.stones;
       rules.board.markers = info.heat;
       rules.board.passes = info.passes;
       rules.board.resigns = info.resigns; 
+
+    } else {
+      var info_obj = { color: global.current_color
+                    , stones: rules.board.stones
+                    ,   heat: rules.board.markers
+                    , passes: rules.board.passes
+                    ,resigns: rules.board.resigns
+                    ,   caps: rules.board.captures };
+
+      db.set('go:info', JSON.stringify(info_obj), function(err){
+        if(err) throw err;
+      });
     }
-    console.log(rules.board);
   });
 });
 
