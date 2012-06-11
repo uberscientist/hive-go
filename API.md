@@ -42,6 +42,6 @@ This returns a JSON object containing the UNIX time stamp of when the round ends
 ## **/vote**
 
 
-Accepts a JSON string formatted like so: `vote={ x: 4, y: 4 }`. 
+Accepts a JSON string formatted like so: `{'x': 4, 'y': 4 }`. 
 `4,4` describes the coordinate of the middle of the board. To vote for a pass or resign, send the respective
-choice as a lowercase string: `vote=resign` or `vote=pass`.
+choice as a lowercase string: `resign` or `pass`.
