@@ -18,7 +18,7 @@ var express = require('express')
 io.set('log level', 1);
 
 // Set round time in hours
-var round_time = 6;
+var round_time = 12;
 
 // Extending date prototype
 Date.prototype.addHours = function(h){

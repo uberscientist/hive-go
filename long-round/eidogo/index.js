@@ -116,6 +116,19 @@ exports.voteStone = function (old_coord, coord, callback){
 
   } else {
     rules.board.markers[coord.y * 9 + coord.x] += 1;
+
+    //Update Redis game info with every vote
+    var info_obj = { color: global.current_color
+                    , stones: rules.board.stones
+                    ,   heat: rules.board.markers
+                    , passes: rules.board.passes
+                    ,resigns: rules.board.resigns
+                    ,   caps: rules.board.captures };
+
+    db.set('go:info', JSON.stringify(info_obj), function(err){
+      if(err) throw err;
+    });
+
     callback();
   }
 }

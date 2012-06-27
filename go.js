@@ -75,6 +75,7 @@ function vote(coord, ip, callback){
   //Get UNIX time stamp for when all votes should expire
   var expire_time = Math.round(next_round.getTime()/1000);
 
+
   db.exists('go:'+ip, function(err, data){
     if(err) throw err;
 
@@ -133,7 +134,7 @@ function updateBoard(){
                     ,   heat: go.rules.board.markers
                     , passes: go.rules.board.passes
                     ,resigns: go.rules.board.resigns
-                      , caps: go.rules.board.captures };
+                    ,   caps: go.rules.board.captures };
 
         //clear votes and update redis board
         db.multi()
