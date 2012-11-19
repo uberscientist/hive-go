@@ -1,4 +1,21 @@
- <div id="page-wrap">
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hive Go</title>
+    <link href="http://fonts.googleapis.com/css?family=Chelsea+Market" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="stylesheets/style.css" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if IE]><script type="text/javascript" src="/javascripts/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="http://hivego.info:9090/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/kinetic-v3.8.3.min.js"></script>
+    <script type="text/javascript" src="javascripts/goban.js"></script>
+    <script type="text/javascript" src="javascripts/chat.js"></script>
+  </head>
+  <body>
+  <div id="page-wrap">
     <div class="message">
       It's <span id="current-color">???</span><b>'s</b> turn.
       <div class="timer">
@@ -14,7 +31,7 @@
         <li><a href="http://www.usgo.org/resources/rulesofgo.html">The Rules of Go</a></li>
         <li>Hive Go Short Round</li>
         <li><a href="http://long.hivego.info">Hive Go Long Round</a></li>
-        <li><a href="/sgf/game.sgf">Download SGF</a></li>
+        <li><a href="sgf/game.sgf">Download SGF</a></li>
       </ul>
     </nav>
 
@@ -50,3 +67,7 @@
     </div>
     <script type="text/javascript" src="http://static.addtoany.com/menu/page.js"></script>
     <!-- Lockerz Share END -->
+    <!-- twitter follow button -->
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </body>
+</html>

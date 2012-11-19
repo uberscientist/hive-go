@@ -1,4 +1,4 @@
-var socket = io.connect("http://hivego.info:3002");
+var socket = io.connect("http://hivego.info:9091");
 
 // Socket.IO events
 socket.on("tick", function(data){
@@ -361,5 +361,5 @@ function drawBoardBg(callback){
     callback();
   };
 
-  gobanGridObj.src = "/images/goban9.png";
+  gobanGridObj.src = "images/goban9.png";
 };

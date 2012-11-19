@@ -1,24 +1,15 @@
-/**
- * Module dependencies.
- */
 var go = require('./eidogo'),
     tweet = require('tweet.js'),
     sgf = require('sgf.js'),
 
-    //Redis client
-    db = require('db.js');
-
-var express = require('express')
-  , routes = require('./routes')
-
-  , app = module.exports = express.createServer()
-  , io = require('socket.io').listen(app);
+    db = require('db.js'), //Redis client
+    io = require('socket.io').listen(9090);
 
 //Lowering debug level to clear up console
 io.set('log level', 1);
 
-// Set round time in hours
-var round_time = 12;
+// Set round time in minutes
+var round_time = 1;
 
 // Extending date prototype
 Date.prototype.addHours = function(h){
@@ -37,24 +28,6 @@ Date.prototype.addSeconds = function(s){
   this.setSeconds(this.getSeconds() + s);
   return this;
 }
-
-// Configuration
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
-});
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler()); 
-});
 
 // Functions
 function sanitize(text){
@@ -75,16 +48,17 @@ function vote(coord, ip, callback){
   //Get UNIX time stamp for when all votes should expire
   var expire_time = Math.round(next_round.getTime()/1000);
 
-  db.exists('go2:'+ip, function(err, data){
+
+  db.exists('go:'+ip, function(err, data){
     if(err) throw err;
 
     if(data == 0){
 
       //First time voting??
       db.multi()
-        .set('go2:'+ip, JSON.stringify(coord))
-        .expireat('go2:'+ip, expire_time)
-        .zincrby('go2:votes', 1, JSON.stringify(coord))
+        .set('go:'+ip, JSON.stringify(coord))
+        .expireat('go:'+ip, expire_time)
+        .zincrby('go:votes', 1, JSON.stringify(coord))
         .exec(function(err, results){
           if(err) throw err;
           go.voteStone(false, coord, function(){
@@ -94,12 +68,12 @@ function vote(coord, ip, callback){
     } else {
 
       //Subsequent votes...
-      db.get('go2:'+ip, function(err, old_coord){
+      db.get('go:'+ip, function(err, old_coord){
         db.multi()
-          .zincrby('go2:votes', -1, old_coord)
-          .zincrby('go2:votes', 1, JSON.stringify(coord))
-          .set('go2:'+ip, JSON.stringify(coord))
-          .expireat('go2:'+ip, expire_time)
+          .zincrby('go:votes', -1, old_coord)
+          .zincrby('go:votes', 1, JSON.stringify(coord))
+          .set('go:'+ip, JSON.stringify(coord))
+          .expireat('go:'+ip, expire_time)
           .exec(function(err){
             if(err) throw err;
             go.voteStone(JSON.parse(old_coord), coord, function(){
@@ -116,10 +90,10 @@ function updateBoard(){
   //Reset timer/tweet variables
   global.tweeted = false;
   global.start_time = new Date().getTime();
-  global.next_round = new Date().addHours(round_time);
+  global.next_round = new Date().addMinutes(round_time);
 
   //Get top ranked coordinate
-  db.zrevrange('go2:votes', 0, 0, function(err, data){
+  db.zrevrange('go:votes', 0, 0, function(err, data){
     if(err) throw err;
 
     if(data.length > 0){
@@ -133,12 +107,12 @@ function updateBoard(){
                     ,   heat: go.rules.board.markers
                     , passes: go.rules.board.passes
                     ,resigns: go.rules.board.resigns
-                      , caps: go.rules.board.captures };
+                    ,   caps: go.rules.board.captures };
 
         //clear votes and update redis board
         db.multi()
-          .set('go2:info', JSON.stringify(info_obj))
-          .del('go2:votes')
+          .set('go:info', JSON.stringify(info_obj))
+          .del('go:votes')
           .exec(function(err){
             if(err) throw err;
             sendBoardInfo();
@@ -150,7 +124,7 @@ function updateBoard(){
     } else {
 
     //In case of no votes reset clock
-      next_round = new Date().addHours(round_time);
+      next_round = new Date().addMinutes(round_time);
       return;
     }
   });
@@ -169,7 +143,7 @@ function sendBoardInfo(){
 
 function getChatLog(callback){
   var log = '';
-  db.lrange('go2:chat_log', 0, -1, function(err, messages){
+  db.lrange('go:chat_log', 0, -1, function(err, messages){
     if(err) throw err;
     for(var i = 0; i < messages.length; i++){
       log += messages[messages.length-1 - i] + '<br/>';
@@ -181,15 +155,12 @@ function getChatLog(callback){
 
 function logChat(name, text){
   db.multi()
-    .lpush('go2:chat_log', name + ': ' + text)
-    .ltrim('go2:chat_log', 0, 9)
+    .lpush('go:chat_log', name + ': ' + text)
+    .ltrim('go:chat_log', 0, 9)
     .exec(function(err){
       if(err) throw err;
     });
 }
-
-// Routes
-app.get('/', routes.index);
 
 // Socket.IO
 io.sockets.on('connection', function(socket){
@@ -242,19 +213,17 @@ function untilNext(){
   //halfway through round tweet round info
   var half_way = ((next_round - start_time)/2) + start_time;
   if(tweeted == false && now > half_way){
-    tweet.info(next_round, go.rules.board.markers);
+    //tweet.info(next_round, go.rules.board.markers);
     global.tweeted = true;
   }
 };
 
 // Initialization and interval timer
 global.start_time = new Date().getTime();
-global.next_round = new Date().addHours(round_time);
+global.next_round = new Date().addMinutes(round_time);
 
 //Start color as black
 global.current_color =  -1;
 global.tweeted = false;
 
 setInterval(untilNext, 1000);
-
-app.listen(3002);
